@@ -7,8 +7,10 @@ import org.reflections.serializers.Serializer;
 
 import javax.annotation.Nullable;
 import java.net.URL;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Predicate;
 
 /**
  * Configuration is used to create a configured instance of {@link Reflections}
@@ -26,8 +28,7 @@ public interface Configuration {
     MetadataAdapter getMetadataAdapter();
 
     /** get the fully qualified name filter used to filter types to be scanned */
-    @Nullable
-    Predicate<String> getInputsFilter();
+    Optional<Predicate<String>> getInputsFilter();
 
     /** executor service used to scan files. if null, scanning is done in a simple for loop */
     ExecutorService getExecutorService();
@@ -36,8 +37,7 @@ public interface Configuration {
     Serializer getSerializer();
 
     /** get class loaders, might be used for resolving methods/fields */
-    @Nullable
-    ClassLoader[] getClassLoaders();
+    Optional<ClassLoader[]> getClassLoaders();
 
     /** if true (default), expand super types after scanning, for super types that were not scanned.
      * <p>see {@link org.reflections.Reflections#expandSuperTypes()}*/

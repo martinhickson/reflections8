@@ -1,12 +1,14 @@
 package org.reflections.vfs;
 
-import com.google.common.collect.AbstractIterator;
 import org.reflections.ReflectionsException;
 import org.reflections.util.Utils;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Iterator;
+import java.util.ListIterator;
+import java.util.NoSuchElementException;
+import java.util.PrimitiveIterator;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 
@@ -30,31 +32,43 @@ public class JarInputDir implements Vfs.Dir {
     public Iterable<Vfs.File> getFiles() {
         return new Iterable<Vfs.File>() {
             public Iterator<Vfs.File> iterator() {
-                return new AbstractIterator<Vfs.File>() {
+                return new Iterator<Vfs.File>() {
+                    ZipEntry entry = null;
 
                     {
                         try { jarInputStream = new JarInputStream(url.openConnection().getInputStream()); }
                         catch (Exception e) { throw new ReflectionsException("Could not open url connection", e); }
                     }
 
-                    protected Vfs.File computeNext() {
+                    public Vfs.File next() {
                         while (true) {
-                            try {
-                                ZipEntry entry = jarInputStream.getNextJarEntry();
-                                if (entry == null) {
-                                    return endOfData();
-                                }
 
-                                long size = entry.getSize();
-                                if (size < 0) size = 0xffffffffl + size; //JDK-6916399
-                                nextCursor += size;
-                                if (!entry.isDirectory()) {
-                                    return new JarInputFile(entry, JarInputDir.this, cursor, nextCursor);
+                            if (entry == null) {
+                                if (!hasNext()) {
+                                    throw new NoSuchElementException("nothing left");
                                 }
+                            }
+                            ZipEntry tmp = entry;
+                            entry = null;
+                            long size = tmp.getSize();
+                            if (size < 0) size = 0xffffffffl + size; //JDK-6916399
+                            nextCursor += size;
+                            if (!tmp.isDirectory()) {
+                                return new JarInputFile(tmp, JarInputDir.this, cursor, nextCursor);
+                            }
+                        }
+                    }
+
+                    @Override
+                    public boolean hasNext() {
+                        if (entry == null) {
+                            try {
+                                entry = jarInputStream.getNextJarEntry();
                             } catch (IOException e) {
                                 throw new ReflectionsException("could not get next zip entry", e);
                             }
                         }
+                        return entry != null;
                     }
                 };
             }

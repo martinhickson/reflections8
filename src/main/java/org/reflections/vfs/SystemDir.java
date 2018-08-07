@@ -3,10 +3,7 @@ package org.reflections.vfs;
 import com.google.common.collect.AbstractIterator;
 import com.google.common.collect.Lists;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Stack;
-import java.util.List;
+import java.util.*;
 import java.io.File;
 
 /*
@@ -36,11 +33,11 @@ public class SystemDir implements Vfs.Dir {
         }
         return new Iterable<Vfs.File>() {
             public Iterator<Vfs.File> iterator() {
-                return new AbstractIterator<Vfs.File>() {
+                return new Iterator<Vfs.File>() {
                     final Stack<File> stack = new Stack<File>();
                     {stack.addAll(listFiles(file));}
 
-                    protected Vfs.File computeNext() {
+                    public Vfs.File next() {
                         while (!stack.isEmpty()) {
                             final File file = stack.pop();
                             if (file.isDirectory()) {
@@ -61,9 +58,9 @@ public class SystemDir implements Vfs.Dir {
         File[] files = file.listFiles();
 
         if (files != null)
-            return Lists.newArrayList(files);
+            return Arrays.asList(files);
         else
-            return Lists.newArrayList();
+            return new ArrayList();
     }
 
     public void close() {

@@ -1,14 +1,11 @@
 package org.reflections.util;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Sets;
 import org.reflections.Reflections;
 import org.reflections.ReflectionsException;
 import org.reflections.scanners.Scanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,10 +13,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.reflections.ReflectionUtils.forName;
 
@@ -96,7 +90,7 @@ public abstract class Utils {
     }
 
     public static Set<Method> getMethodsFromDescriptors(Iterable<String> annotatedWith, ClassLoader... classLoaders) {
-        Set<Method> result = Sets.newHashSet();
+        Set<Method> result = new HashSet();
         for (String annotated : annotatedWith) {
             if (!isConstructor(annotated)) {
                 Method member = (Method) getMemberFromDescriptor(annotated, classLoaders);
@@ -107,7 +101,7 @@ public abstract class Utils {
     }
 
     public static Set<Constructor> getConstructorsFromDescriptors(Iterable<String> annotatedWith, ClassLoader... classLoaders) {
-        Set<Constructor> result = Sets.newHashSet();
+        Set<Constructor> result = new HashSet();
         for (String annotated : annotatedWith) {
             if (isConstructor(annotated)) {
                 Constructor member = (Constructor) getMemberFromDescriptor(annotated, classLoaders);
@@ -118,7 +112,7 @@ public abstract class Utils {
     }
 
     public static Set<Member> getMembersFromDescriptors(Iterable<String> values, ClassLoader... classLoaders) {
-        Set<Member> result = Sets.newHashSet();
+        Set<Member> result = new HashSet();
         for (String value : values) {
             try {
                 result.add(Utils.getMemberFromDescriptor(value, classLoaders));
@@ -149,15 +143,14 @@ public abstract class Utils {
         }
     }
 
-    @Nullable
-    public static Logger findLogger(Class<?> aClass) {
+    public static Optional<Logger> findLogger(Class<?> aClass) {
         try {
             // This is to check whether an optional SLF4J binding is available. While SLF4J recommends that libraries
             // "should not declare a dependency on any SLF4J binding but only depend on slf4j-api", doing so forces
             // users of the library to either add a binding to the classpath (even if just slf4j-nop) or to set the
             // "slf4j.suppressInitError" system property in order to avoid the warning, which both is inconvenient.
             Class.forName("org.slf4j.impl.StaticLoggerBinder");
-            return LoggerFactory.getLogger(aClass);
+            return Optional.of(LoggerFactory.getLogger(aClass));
         } catch (Throwable e) {
             return null;
         }
