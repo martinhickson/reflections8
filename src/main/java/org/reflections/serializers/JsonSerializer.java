@@ -1,16 +1,31 @@
 package org.reflections.serializers;
 
-import org.reflections.Reflections;
-import org.reflections.util.Utils;
-
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
+
+import org.reflections.Reflections;
+import org.reflections.util.HashSetMultimap;
+import org.reflections.util.SetMultimap;
+import org.reflections.util.Utils;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
 
 /** serialization of Reflections to json
  *
@@ -24,10 +39,10 @@ import java.util.Set;
  * </pre>
  * */
 public class JsonSerializer implements Serializer {
-    // private Gson gson;
+    private Gson gson;
 
     public Reflections read(InputStream inputStream) {
-        return null; // getGson().fromJson(new InputStreamReader(inputStream), Reflections.class);
+        return getGson().fromJson(new InputStreamReader(inputStream), Reflections.class);
     }
 
     public File save(Reflections reflections, String filename) {
@@ -41,28 +56,27 @@ public class JsonSerializer implements Serializer {
     }
 
     public String toString(Reflections reflections) {
-        return null; // getGson().toJson(reflections);
+        return getGson().toJson(reflections);
     }
 
-    /*
     private Gson getGson() {
         if (gson == null) {
             gson = new GsonBuilder()
-                    .registerTypeAdapter(Multimap.class, new com.google.gson.JsonSerializer<Multimap>() {
-                        public JsonElement serialize(Multimap multimap, Type type, JsonSerializationContext jsonSerializationContext) {
+                    .registerTypeAdapter(SetMultimap.class, new com.google.gson.JsonSerializer<SetMultimap>() {
+                        public JsonElement serialize(SetMultimap multimap, Type type, JsonSerializationContext jsonSerializationContext) {
                             return jsonSerializationContext.serialize(multimap.asMap());
                         }
                     })
-                    .registerTypeAdapter(Multimap.class, new JsonDeserializer<Multimap>() {
-                        public Multimap deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
-                            final SetMultimap<String,String> map = Multimaps.newSetMultimap(new HashMap<String, Collection<String>>(), new Supplier<Set<String>>() {
+                    .registerTypeAdapter(SetMultimap.class, new JsonDeserializer<SetMultimap>() {
+                        public SetMultimap deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+                            final SetMultimap<String,String> map = new HashSetMultimap(new Supplier<Set<String>>() {
                                 public Set<String> get() {
-                                    return Sets.newHashSet();
+                                    return new HashSet();
                                 }
                             });
                             for (Map.Entry<String, JsonElement> entry : ((JsonObject) jsonElement).entrySet()) {
                                 for (JsonElement element : (JsonArray) entry.getValue()) {
-                                    map.get(entry.getKey()).add(element.getAsString());
+                                    map.putSingle(entry.getKey(), element.getAsString());
                                 }
                             }
                             return map;
@@ -74,5 +88,5 @@ public class JsonSerializer implements Serializer {
         }
         return gson;
     }
-    */
+
 }

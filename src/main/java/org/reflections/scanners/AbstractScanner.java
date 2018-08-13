@@ -1,15 +1,14 @@
 package org.reflections.scanners;
 
+import java.util.Optional;
+import java.util.function.Predicate;
+
 import org.reflections.Configuration;
 import org.reflections.ReflectionsException;
 import org.reflections.adapters.MetadataAdapter;
 import org.reflections.util.AlwaysTruePredicate;
-import org.reflections.util.Multimap;
 import org.reflections.util.SetMultimap;
 import org.reflections.vfs.Vfs;
-
-import java.util.Optional;
-import java.util.function.Predicate;
 
 /**
  *

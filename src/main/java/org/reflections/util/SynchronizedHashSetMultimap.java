@@ -6,23 +6,23 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * @author aschoerk
  */
-public class SynchronizedSetMultimap<K, V> extends SetMultimap<K, V> {
+public class SynchronizedHashSetMultimap<K, V> extends HashSetMultimap<K, V> implements SetMultimap<K,V> {
 
     private static final long serialVersionUID = -907195260984577390L;
 
     Object mutex;
     SetMultimap delegate;
 
-    public SynchronizedSetMultimap(final SetMultimap delegate) {
+    public SynchronizedHashSetMultimap(final SetMultimap delegate) {
         this.delegate = delegate;
         this.mutex = this;
     }
 
+    @Override
     public boolean putSingle(final Object key, final Object value) {
         synchronized (mutex) {
             return delegate.putSingle(key, value);
@@ -46,6 +46,13 @@ public class SynchronizedSetMultimap<K, V> extends SetMultimap<K, V> {
     public Set flatValuesAsSet() {
         synchronized (mutex) {
             return delegate.flatValuesAsSet();
+        }
+    }
+
+    @Override
+    public Map asMap() {
+        synchronized (mutex) {
+            return delegate.asMap();
         }
     }
 
@@ -336,19 +343,6 @@ public class SynchronizedSetMultimap<K, V> extends SetMultimap<K, V> {
     public void replaceAll(final BiFunction function) {
         synchronized (mutex) {
             delegate.replaceAll(function);
-        }
-    }
-
-    /**
-     * Returns a shallow copy of this <tt>HashMap</tt> instance: the keys and
-     * values themselves are not cloned.
-     *
-     * @return a shallow copy of this map
-     */
-    @Override
-    public Object clone() {
-        synchronized (mutex) {
-            return delegate.clone();
         }
     }
 

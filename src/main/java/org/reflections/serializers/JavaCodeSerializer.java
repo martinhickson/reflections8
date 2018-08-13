@@ -1,13 +1,9 @@
 package org.reflections.serializers;
 
-import org.reflections.ReflectionUtils;
-import org.reflections.Reflections;
-import org.reflections.ReflectionsException;
-import org.reflections.scanners.TypeElementsScanner;
-import org.reflections.util.Joiner;
-import org.reflections.util.Multimap;
-import org.reflections.util.SetMultimap;
-import org.reflections.util.Utils;
+import static org.reflections.Reflections.log;
+import static org.reflections.util.Utils.index;
+import static org.reflections.util.Utils.prepareFile;
+import static org.reflections.util.Utils.repeat;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,14 +13,25 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
-import static org.reflections.Reflections.log;
-import static org.reflections.util.Utils.index;
-import static org.reflections.util.Utils.prepareFile;
-import static org.reflections.util.Utils.repeat;
+import org.reflections.ReflectionUtils;
+import org.reflections.Reflections;
+import org.reflections.ReflectionsException;
+import org.reflections.scanners.TypeElementsScanner;
+import org.reflections.util.HashSetMultimap;
+import org.reflections.util.Joiner;
+import org.reflections.util.SetMultimap;
+import org.reflections.util.Utils;
 
 /** Serialization of Reflections to java code
  * <p> Serializes types and types elements into interfaces respectively to fully qualified name,
@@ -155,7 +162,7 @@ public class JavaCodeSerializer implements Serializer {
             //get fields and methods
             List<String> annotations = new ArrayList();
             List<String> fields = new ArrayList();
-            final SetMultimap<String,String> methods = new SetMultimap(new Supplier<Set<String>>() {
+            final SetMultimap<String,String> methods = new HashSetMultimap(new Supplier<Set<String>>() {
                 public Set<String> get() {
                     return new HashSet();
                 }

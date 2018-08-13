@@ -1,12 +1,11 @@
 package org.reflections.scanners;
 
-import org.reflections.Configuration;
-import org.reflections.util.Multimap;
-import org.reflections.util.SetMultimap;
-import org.reflections.vfs.Vfs;
-
 import java.util.Optional;
 import java.util.function.Predicate;
+
+import org.reflections.Configuration;
+import org.reflections.util.SetMultimap;
+import org.reflections.vfs.Vfs;
 
 /**
  *

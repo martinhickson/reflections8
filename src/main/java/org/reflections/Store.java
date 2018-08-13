@@ -1,16 +1,19 @@
 package org.reflections;
 
-import org.reflections.util.Multimap;
-import org.reflections.util.SetMultimap;
-import org.reflections.util.SynchronizedSetMultimap;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import org.reflections.util.HashSetMultimap;
+import org.reflections.util.SetMultimap;
+import org.reflections.util.SynchronizedHashSetMultimap;
 
 /**
  * stores metadata information in multimaps
@@ -45,13 +48,13 @@ public class Store {
         SetMultimap<String, String> mmap = storeMap.get(index);
         if (mmap == null) {
             SetMultimap<String, String> multimap =
-                new SetMultimap(
+                new HashSetMultimap(
                         new Supplier<Set<String>>() {
                             public Set<String> get() {
                                 return Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
                             }
                         });
-            mmap = concurrent ? new SynchronizedSetMultimap<String, String>(multimap) : multimap;
+            mmap = concurrent ? new SynchronizedHashSetMultimap<String, String>(multimap) : multimap;
             storeMap.put(index,mmap);
         }
         return mmap;

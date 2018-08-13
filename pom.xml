@@ -8,7 +8,7 @@
 
     <name>Reflections</name>
     <description>Reflections - a Java runtime metadata analysis</description>
-    <url>http://github.com/ronmamo/reflections</url>
+    <url>http://github.com/aschoerk/reflections</url>
 
     <licenses>
         <license>
@@ -22,25 +22,19 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/ronmamo/reflections/issues</url>
-        <connection>scm:git:git://github.com/ronmamo/reflections.git</connection>
+        <url>https://github.com/aschoerk/reflections/issues</url>
+        <connection>scm:git:git://github.com/aschoerk/reflections.git</connection>
     </scm>
 
     <issueManagement>
-        <url>https://github.com/ronmamo/reflections/issues</url>
+        <url>https://github.com/aschoerk/reflections/issues</url>
         <system>GitHub Issues</system>
     </issueManagement>
 
-    <mailingLists>
-        <mailingList>
-            <name>google-code-reflections</name>
-            <archive>http://groups.google.com/group/google-code-reflections</archive>
-        </mailingList>
-    </mailingLists>
 
     <developers>
         <developer>
-            <email>ronmamo at gmail</email>
+            <email>aschoerk at gmx.net</email>
         </developer>
     </developers>
 
@@ -52,18 +46,12 @@
     </distributionManagement>
 
     <properties>
-        <guava.version>20.0</guava.version>
         <javassist.version>3.22.0-GA</javassist.version>
         <jdk.version>1.8</jdk.version>
         <additionalparam>-Xdoclint:none</additionalparam>
     </properties>
 
     <dependencies>
-        <!--dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
-        </dependency-->
 
         <dependency>
             <groupId>org.javassist</groupId>
@@ -87,18 +75,13 @@
             <optional>true</optional> <!-- case: when no xml de/serialization -->
         </dependency>
 
-        <!--dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.8.0</version>
             <optional>true</optional>
-        </dependency-->
-
-        <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>1.2</version>
         </dependency>
+
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
@@ -114,13 +97,6 @@
             <version>1.7.24</version>
             <optional>true</optional> <!-- case: when other logging implementation used or logging is not needed -->
         </dependency>
-
-        <!--dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.1</version>
-            <scope>provided</scope>
-        </dependency-->
 
         <dependency>
             <groupId>junit</groupId>

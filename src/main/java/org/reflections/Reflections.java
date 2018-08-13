@@ -1,15 +1,26 @@
 package org.reflections;
 
-import org.reflections.scanners.*;
-import org.reflections.scanners.Scanner;
-import org.reflections.serializers.Serializer;
-import org.reflections.serializers.XmlSerializer;
-import org.reflections.util.*;
-import org.reflections.vfs.Vfs;
-import org.slf4j.Logger;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import static java.lang.String.format;
+import static org.reflections.ReflectionUtils.filter;
+import static org.reflections.ReflectionUtils.forName;
+import static org.reflections.ReflectionUtils.forNames;
+import static org.reflections.ReflectionUtils.withAnnotation;
+import static org.reflections.ReflectionUtils.withAnyParameterAnnotation;
+import static org.reflections.util.Utils.close;
+import static org.reflections.util.Utils.findLogger;
+import static org.reflections.util.Utils.getConstructorsFromDescriptors;
+import static org.reflections.util.Utils.getFieldFromString;
+import static org.reflections.util.Utils.getMembersFromDescriptors;
+import static org.reflections.util.Utils.getMethodsFromDescriptors;
+import static org.reflections.util.Utils.index;
+import static org.reflections.util.Utils.name;
+import static org.reflections.util.Utils.names;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 import java.lang.reflect.Constructor;
@@ -17,7 +28,13 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -27,9 +44,27 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static java.lang.String.format;
-import static org.reflections.ReflectionUtils.*;
-import static org.reflections.util.Utils.*;
+import org.reflections.scanners.FieldAnnotationsScanner;
+import org.reflections.scanners.MemberUsageScanner;
+import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.scanners.MethodParameterNamesScanner;
+import org.reflections.scanners.MethodParameterScanner;
+import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.Scanner;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.scanners.TypeAnnotationsScanner;
+import org.reflections.serializers.Serializer;
+import org.reflections.serializers.XmlSerializer;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
+import org.reflections.util.HashSetMultimap;
+import org.reflections.util.Joiner;
+import org.reflections.util.ReflectionsIterables;
+import org.reflections.util.SetMultimap;
+import org.reflections.util.Utils;
+import org.reflections.vfs.Vfs;
+import org.slf4j.Logger;
 
 /**
  * Reflections one-stop-shop object
@@ -384,7 +419,7 @@ public class  Reflections {
             Set<String> difference = new HashSet<>();
             difference.addAll(mmap.keySet());
             difference.removeAll(mmap.flatValuesAsSet());
-            SetMultimap<String, String> expand = new SetMultimap<>();
+            SetMultimap<String, String> expand = new HashSetMultimap<>();
             for (String key : difference) {
                 final Class<?> type = forName(key, loaders());
                 if (type != null) {
