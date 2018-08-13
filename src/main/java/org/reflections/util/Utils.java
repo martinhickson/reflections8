@@ -1,10 +1,6 @@
 package org.reflections.util;
 
-import org.reflections.Reflections;
-import org.reflections.ReflectionsException;
-import org.reflections.scanners.Scanner;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.reflections.ReflectionUtils.forName;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,9 +9,18 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-import static org.reflections.ReflectionUtils.forName;
+import org.reflections.Reflections;
+import org.reflections.ReflectionsException;
+import org.reflections.scanners.Scanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * a garbage can of convenient methods
@@ -172,7 +177,7 @@ public abstract class Utils {
             Class.forName("org.slf4j.impl.StaticLoggerBinder");
             return Optional.of(LoggerFactory.getLogger(aClass));
         } catch (Throwable e) {
-            return null;
+            return Optional.empty();
         }
     }
 

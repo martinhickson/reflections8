@@ -1,19 +1,28 @@
 package org.reflections.adapters;
 
-import javassist.bytecode.*;
-import javassist.bytecode.annotation.Annotation;
-import org.reflections.ReflectionsException;
-import org.reflections.util.Utils;
-import org.reflections.vfs.Vfs;
+import static javassist.bytecode.AccessFlag.isPrivate;
+import static javassist.bytecode.AccessFlag.isProtected;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.StringJoiner;
 
-import static javassist.bytecode.AccessFlag.isPrivate;
-import static javassist.bytecode.AccessFlag.isProtected;
+import org.reflections.ReflectionsException;
+import org.reflections.vfs.Vfs;
+
+import javassist.bytecode.AccessFlag;
+import javassist.bytecode.AnnotationsAttribute;
+import javassist.bytecode.ClassFile;
+import javassist.bytecode.Descriptor;
+import javassist.bytecode.FieldInfo;
+import javassist.bytecode.MethodInfo;
+import javassist.bytecode.ParameterAnnotationsAttribute;
+import javassist.bytecode.annotation.Annotation;
 
 /**
  *
@@ -21,7 +30,7 @@ import static javassist.bytecode.AccessFlag.isProtected;
 public class JavassistAdapter implements MetadataAdapter<ClassFile, FieldInfo, MethodInfo> {
 
     /**setting this to false will result in returning only visible annotations from the relevant methods here (only {@link java.lang.annotation.RetentionPolicy#RUNTIME})*/
-    public static boolean includeInvisibleTag = true;
+    public static final boolean includeInvisibleTag = true;
 
     public List<FieldInfo> getFields(final ClassFile cls) {
         //noinspection unchecked
@@ -91,15 +100,13 @@ public class JavassistAdapter implements MetadataAdapter<ClassFile, FieldInfo, M
     }
 
     public ClassFile getOrCreateClassObject(final Vfs.File file) {
-        InputStream inputStream = null;
         try {
-            inputStream = file.openInputStream();
-            DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
-            return new ClassFile(dis);
+            try (InputStream inputStream = file.openInputStream()) {
+                DataInputStream dis = new DataInputStream(new BufferedInputStream(inputStream));
+                return new ClassFile(dis);
+            }
         } catch (IOException e) {
             throw new ReflectionsException("could not create class file from " + file.getName(), e);
-        } finally {
-            Utils.close(inputStream);
         }
     }
 

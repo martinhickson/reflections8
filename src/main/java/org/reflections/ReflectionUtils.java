@@ -67,7 +67,7 @@ import org.reflections.util.ClasspathHelper;
 public abstract class ReflectionUtils {
 
     /** would include {@code Object.class} when {@link #getAllSuperTypes(Class, Predicate[])}. default is false. */
-    public static boolean includeObject = false;
+    public static final boolean includeObject = false;
 
     /** get all super types of given {@code type}, including, optionally filtered by {@code predicates}
      * <p> include {@code Object.class} if {@link #includeObject} is true */
@@ -279,8 +279,8 @@ public abstract class ReflectionUtils {
             public boolean test(Member input) {
                 return input != null && annotationTypes(parameterAnnotations(input)).stream()
                         .anyMatch(new Predicate<Class<? extends Annotation>>() {
-                            public boolean test(Class<? extends Annotation> input) {
-                                return input.equals(annotationClass);
+                            public boolean test(Class<? extends Annotation> predicateInput) {
+                                return predicateInput.equals(annotationClass);
                             };
                         });
             }
@@ -292,8 +292,8 @@ public abstract class ReflectionUtils {
         return new Predicate<Member>() {
             public boolean test(Member input) {
                 return input != null && parameterAnnotations(input).stream().anyMatch(new Predicate<Annotation>() {
-                    public boolean test(Annotation input) {
-                        return areAnnotationMembersMatching(annotation, input);
+                    public boolean test(Annotation innerInput) {
+                        return areAnnotationMembersMatching(annotation, innerInput);
                     }
                 });
             }
@@ -446,8 +446,8 @@ public abstract class ReflectionUtils {
 
     private static Class[] parameterTypes(Member member) {
         return member != null ?
-                member.getClass() == Method.class ? ((Method) member).getParameterTypes() :
-                        member.getClass() == Constructor.class ? ((Constructor) member).getParameterTypes() : null : null;
+                (member.getClass() == Method.class ? ((Method) member).getParameterTypes() :
+                         (member.getClass() == Constructor.class ? ((Constructor) member).getParameterTypes() : null)) : null;
     }
 
     private static Set<Annotation> parameterAnnotations(Member member) {

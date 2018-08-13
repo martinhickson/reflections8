@@ -6,7 +6,6 @@ import static org.reflections.ReflectionUtils.forName;
 import static org.reflections.ReflectionUtils.forNames;
 import static org.reflections.ReflectionUtils.withAnnotation;
 import static org.reflections.ReflectionUtils.withAnyParameterAnnotation;
-import static org.reflections.util.Utils.close;
 import static org.reflections.util.Utils.findLogger;
 import static org.reflections.util.Utils.getConstructorsFromDescriptors;
 import static org.reflections.util.Utils.getFieldFromString;
@@ -133,7 +132,7 @@ import org.slf4j.Logger;
  * <p><p><p>For Javadoc, source code, and more information about Reflections Library, see http://github.com/ronmamo/reflections/
  */
 public class  Reflections {
-    public static Optional<Logger> log = findLogger(Reflections.class);
+    public static final Optional<Logger> log = findLogger(Reflections.class);
 
     protected final transient Configuration configuration;
     protected Store store;
@@ -330,14 +329,12 @@ public class  Reflections {
         final Reflections reflections = new Reflections();
         Iterable<Vfs.File> files = Vfs.findFiles(urls, packagePrefix, resourceNameFilter);
         for (final Vfs.File file : files) {
-            InputStream inputStream = null;
             try {
-                inputStream = file.openInputStream();
-                reflections.merge(serializer.read(inputStream));
+                try(InputStream inputStream = file.openInputStream()) {
+                    reflections.merge(serializer.read(inputStream));
+                }
             } catch (IOException e) {
                 throw new ReflectionsException("could not merge " + file, e);
-            } finally {
-                close(inputStream);
             }
         }
 

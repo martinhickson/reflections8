@@ -1,16 +1,21 @@
 package org.reflections.adapters;
 
+import static org.reflections.ReflectionUtils.forName;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.reflections.util.Joiner;
 import org.reflections.util.Utils;
 import org.reflections.vfs.Vfs;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.reflections.ReflectionUtils.forName;
 
 /** */
 public class JavaReflectionAdapter implements MetadataAdapter<Class, Field, Member> {
@@ -100,6 +105,8 @@ public class JavaReflectionAdapter implements MetadataAdapter<Class, Field, Memb
     }
 
     public boolean isPublic(Object o) {
+        if (o == null)
+            return false;
         Integer mod =
                 o instanceof Class ? ((Class) o).getModifiers() :
                 o instanceof Member ? ((Member) o).getModifiers() : null;
@@ -129,6 +136,8 @@ public class JavaReflectionAdapter implements MetadataAdapter<Class, Field, Memb
     
     //
     private List<String> getAnnotationNames(Annotation[] annotations) {
+        if (annotations == null)
+            return Collections.emptyList();
         List<String> names = new ArrayList<String>(annotations.length);
         for (Annotation annotation : annotations) {
             names.add(annotation.annotationType().getName());
