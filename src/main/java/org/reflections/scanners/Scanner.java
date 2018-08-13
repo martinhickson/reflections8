@@ -1,11 +1,12 @@
 package org.reflections.scanners;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Multimap;
 import org.reflections.Configuration;
+import org.reflections.util.Multimap;
+import org.reflections.util.SetMultimap;
 import org.reflections.vfs.Vfs;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  *
@@ -14,15 +15,15 @@ public interface Scanner {
 
     void setConfiguration(Configuration configuration);
 
-    Multimap<String, String> getStore();
+    SetMultimap<String, String> getStore();
 
-    void setStore(Multimap<String, String> store);
+    void setStore(SetMultimap<String, String> store);
 
     Scanner filterResultsBy(Predicate<String> filter);
 
     boolean acceptsInput(String file);
 
-    Object scan(Vfs.File file, @Nullable Object classObject);
+    Object scan(Vfs.File file, Optional<Object> classObject);
 
     boolean acceptResult(String fqn);
 }

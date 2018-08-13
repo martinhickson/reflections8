@@ -14,7 +14,7 @@ public class FieldAnnotationsScanner extends AbstractScanner {
 
                 if (acceptResult(fieldAnnotation)) {
                     String fieldName = getMetadataAdapter().getFieldName(field);
-                    getStore().put(fieldAnnotation, String.format("%s.%s", className, fieldName));
+                    getStore().putSingle(fieldAnnotation, String.format("%s.%s", className, fieldName));
                 }
             }
         }

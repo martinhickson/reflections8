@@ -1,10 +1,14 @@
 package org.reflections;
 
-import com.google.common.base.Supplier;
-import com.google.common.collect.*;
+import org.reflections.util.Multimap;
+import org.reflections.util.SetMultimap;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * stores metadata information in multimaps
@@ -15,17 +19,17 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Store {
 
     private transient boolean concurrent;
-    private final Map<String, Multimap<String, String>> storeMap;
+    private final Map<String, SetMultimap<String, String>> storeMap;
 
     //used via reflection
     @SuppressWarnings("UnusedDeclaration")
     protected Store() {
-        storeMap = new HashMap<String, Multimap<String, String>>();
+        storeMap = new HashMap<String, SetMultimap<String, String>>();
         concurrent = false;
     }
 
     public Store(Configuration configuration) {
-        storeMap = new HashMap<String, Multimap<String, String>>();
+        storeMap = new HashMap<String, SetMultimap<String, String>>();
         concurrent = configuration.getExecutorService() != null;
     }
 
@@ -35,25 +39,30 @@ public class Store {
     }
 
     /** get or create the multimap object for the given {@code index} */
-    public Multimap<String, String> getOrCreate(String index) {
-        Multimap<String, String> mmap = storeMap.get(index);
+    public SetMultimap<String, String> getOrCreate(String index) {
+        SetMultimap<String, String> mmap = storeMap.get(index);
         if (mmap == null) {
             SetMultimap<String, String> multimap =
-                    Multimaps.newSetMultimap(new HashMap<String, Collection<String>>(),
-                            new Supplier<Set<String>>() {
-                                public Set<String> get() {
-                                    return Sets.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-                                }
-                            });
-            mmap = concurrent ? Multimaps.synchronizedSetMultimap(multimap) : multimap;
+                new SetMultimap(
+                        new Supplier<Set<String>>() {
+                            public Set<String> get() {
+                                return Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
+                            }
+                        });
+            if (concurrent)
+                throw new NotImplementedException();
+            else {
+                mmap = multimap;
+            }
+            // map = concurrent ? new SynchronizedSetMultimap<String, String>(multimap) : multimap;
             storeMap.put(index,mmap);
         }
         return mmap;
     }
 
     /** get the multimap object for the given {@code index}, otherwise throws a {@link org.reflections.ReflectionsException} */
-    public Multimap<String, String> get(String index) {
-        Multimap<String, String> mmap = storeMap.get(index);
+    public SetMultimap<String, String> get(String index) {
+        SetMultimap<String, String> mmap = storeMap.get(index);
         if (mmap == null) {
             throw new ReflectionsException("Scanner " + index + " was not configured");
         }
@@ -67,7 +76,7 @@ public class Store {
 
     /** get the values stored for the given {@code index} and {@code keys} */
     public Iterable<String> get(String index, Iterable<String> keys) {
-        Multimap<String, String> mmap = get(index);
+        SetMultimap<String, String> mmap = get(index);
         IterableChain<String> result = new IterableChain<String>();
         for (String key : keys) {
             result.addAll(mmap.get(key));
@@ -98,10 +107,16 @@ public class Store {
     }
 
     private static class IterableChain<T> implements Iterable<T> {
-        private final List<Iterable<T>> chain = Lists.newArrayList();
+        private final List<Iterable<T>> chain = new ArrayList();
 
         private void addAll(Iterable<T> iterable) { chain.add(iterable); }
 
-        public Iterator<T> iterator() { return Iterables.concat(chain).iterator(); }
+        public Iterator<T> iterator() {
+            List<T> result = new ArrayList<>();
+            chain.forEach(iterable -> iterable.forEach(element -> result.add(element)));
+            return result.iterator();
+        }
+
+        // public Iterator<T> iterator() { return Iterables.concat(chain).iterator(); }
     }
 }

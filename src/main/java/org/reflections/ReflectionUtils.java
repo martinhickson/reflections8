@@ -1,17 +1,16 @@
 package org.reflections;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import org.reflections.util.AlwaysTruePredicate;
 import org.reflections.util.ClasspathHelper;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static org.reflections.util.Utils.isEmpty;
 
@@ -23,10 +22,10 @@ import static org.reflections.util.Utils.isEmpty;
  *     <pre> Set&#60?> result = getAllXXX(type/s, withYYY) </pre>
  *     <p>where get methods are:
  *     <ul>
- *         <li>{@link #getAllSuperTypes(Class, com.google.common.base.Predicate...)}
- *         <li>{@link #getAllFields(Class, com.google.common.base.Predicate...)}
- *         <li>{@link #getAllMethods(Class, com.google.common.base.Predicate...)}
- *         <li>{@link #getAllConstructors(Class, com.google.common.base.Predicate...)}
+ *         <li>{@link #getAllSuperTypes(Class, Predicate...)}
+ *         <li>{@link #getAllFields(Class, Predicate...)}
+ *         <li>{@link #getAllMethods(Class, Predicate...)}
+ *         <li>{@link #getAllConstructors(Class,Predicate...)}
  *     </ul>
  *     <p>and predicates included here all starts with "with", such as 
  *     <ul>
@@ -56,13 +55,13 @@ import static org.reflections.util.Utils.isEmpty;
 @SuppressWarnings("unchecked")
 public abstract class ReflectionUtils {
 
-    /** would include {@code Object.class} when {@link #getAllSuperTypes(Class, com.google.common.base.Predicate[])}. default is false. */
+    /** would include {@code Object.class} when {@link #getAllSuperTypes(Class, Predicate[])}. default is false. */
     public static boolean includeObject = false;
 
     /** get all super types of given {@code type}, including, optionally filtered by {@code predicates}
      * <p> include {@code Object.class} if {@link #includeObject} is true */
     public static Set<Class<?>> getAllSuperTypes(final Class<?> type, Predicate<? super Class<?>>... predicates) {
-        Set<Class<?>> result = Sets.newLinkedHashSet();
+        Set<Class<?>> result = new LinkedHashSet();
         if (type != null && (includeObject || !type.equals(Object.class))) {
             result.add(type);
             for (Class<?> supertype : getSuperTypes(type)) {
@@ -84,7 +83,7 @@ public abstract class ReflectionUtils {
 
     /** get all methods of given {@code type}, up the super class hierarchy, optionally filtered by {@code predicates} */
     public static Set<Method> getAllMethods(final Class<?> type, Predicate<? super Method>... predicates) {
-        Set<Method> result = Sets.newHashSet();
+        Set<Method> result = new HashSet();
         for (Class<?> t : getAllSuperTypes(type)) {
             result.addAll(getMethods(t, predicates));
         }
@@ -98,7 +97,7 @@ public abstract class ReflectionUtils {
 
     /** get all constructors of given {@code type}, up the super class hierarchy, optionally filtered by {@code predicates} */
     public static Set<Constructor> getAllConstructors(final Class<?> type, Predicate<? super Constructor>... predicates) {
-        Set<Constructor> result = Sets.newHashSet();
+        Set<Constructor> result = new HashSet();
         for (Class<?> t : getAllSuperTypes(type)) {
             result.addAll(getConstructors(t, predicates));
         }
@@ -112,7 +111,7 @@ public abstract class ReflectionUtils {
 
     /** get all fields of given {@code type}, up the super class hierarchy, optionally filtered by {@code predicates} */
     public static Set<Field> getAllFields(final Class<?> type, Predicate<? super Field>... predicates) {
-        Set<Field> result = Sets.newHashSet();
+        Set<Field> result = new HashSet();
         for (Class<?> t : getAllSuperTypes(type)) result.addAll(getFields(t, predicates));
         return result;
     }
@@ -124,7 +123,7 @@ public abstract class ReflectionUtils {
 
     /** get all annotations of given {@code type}, up the super class hierarchy, optionally filtered by {@code predicates} */
     public static <T extends AnnotatedElement> Set<Annotation>  getAllAnnotations(T type, Predicate<Annotation>... predicates) {
-        Set<Annotation> result = Sets.newHashSet();
+        Set<Annotation> result = new HashSet();
         if (type instanceof Class) {
             for (Class<?> t : getAllSuperTypes((Class<?>) type)) {
                 result.addAll(getAnnotations(t, predicates));
@@ -142,14 +141,18 @@ public abstract class ReflectionUtils {
 
     /** filter all given {@code elements} with {@code predicates}, if given */
     public static <T extends AnnotatedElement> Set<T> getAll(final Set<T> elements, Predicate<? super T>... predicates) {
-        return isEmpty(predicates) ? elements : Sets.newHashSet(Iterables.filter(elements, Predicates.and(predicates)));
+        Predicate<? super T> p = new AlwaysTruePredicate<>();
+        for (Predicate x: predicates) {
+            p = p.and(x);
+        }
+        return isEmpty(predicates) ? elements : elements.stream().filter(p).collect(Collectors.toSet());
     }
 
     //predicates
     /** where member name equals given {@code name} */
     public static <T extends Member> Predicate<T> withName(final String name) {
         return new Predicate<T>() {
-            public boolean apply(@Nullable T input) {
+            public boolean test(T input) {
                 return input != null && input.getName().equals(name);
             }
         };
@@ -158,7 +161,7 @@ public abstract class ReflectionUtils {
     /** where member name startsWith given {@code prefix} */
     public static <T extends Member> Predicate<T> withPrefix(final String prefix) {
         return new Predicate<T>() {
-            public boolean apply(@Nullable T input) {
+            public boolean test(T input) {
                 return input != null && input.getName().startsWith(prefix);
             }
         };
@@ -172,7 +175,7 @@ public abstract class ReflectionUtils {
      * */
     public static <T extends AnnotatedElement> Predicate<T> withPattern(final String regex) {
         return new Predicate<T>() {
-            public boolean apply(@Nullable T input) {
+            public boolean test(T input) {
                 return Pattern.matches(regex, input.toString());
             }
         };
@@ -181,7 +184,7 @@ public abstract class ReflectionUtils {
     /** where element is annotated with given {@code annotation} */
     public static <T extends AnnotatedElement> Predicate<T> withAnnotation(final Class<? extends Annotation> annotation) {
         return new Predicate<T>() {
-            public boolean apply(@Nullable T input) {
+            public boolean test(T input) {
                 return input != null && input.isAnnotationPresent(annotation);
             }
         };
@@ -190,7 +193,7 @@ public abstract class ReflectionUtils {
     /** where element is annotated with given {@code annotations} */
     public static <T extends AnnotatedElement> Predicate<T> withAnnotations(final Class<? extends Annotation>... annotations) {
         return new Predicate<T>() {
-            public boolean apply(@Nullable T input) {
+            public boolean test(T input) {
                 return input != null && Arrays.equals(annotations, annotationTypes(input.getAnnotations()));
             }
         };
@@ -199,7 +202,7 @@ public abstract class ReflectionUtils {
     /** where element is annotated with given {@code annotation}, including member matching */
     public static <T extends AnnotatedElement> Predicate<T> withAnnotation(final Annotation annotation) {
         return new Predicate<T>() {
-            public boolean apply(@Nullable T input) {
+            public boolean test(T input) {
                 return input != null && input.isAnnotationPresent(annotation.annotationType()) &&
                         areAnnotationMembersMatching(input.getAnnotation(annotation.annotationType()), annotation);
             }
@@ -209,7 +212,7 @@ public abstract class ReflectionUtils {
     /** where element is annotated with given {@code annotations}, including member matching */
     public static <T extends AnnotatedElement> Predicate<T> withAnnotations(final Annotation... annotations) {
         return new Predicate<T>() {
-            public boolean apply(@Nullable T input) {
+            public boolean test(T input) {
                 if (input != null) {
                     Annotation[] inputAnnotations = input.getAnnotations();
                     if (inputAnnotations.length == annotations.length) {
@@ -226,7 +229,7 @@ public abstract class ReflectionUtils {
     /** when method/constructor parameter types equals given {@code types} */
     public static Predicate<Member> withParameters(final Class<?>... types) {
         return new Predicate<Member>() {
-            public boolean apply(@Nullable Member input) {
+            public boolean test(Member input) {
                 return Arrays.equals(parameterTypes(input), types);
             }
         };
@@ -235,7 +238,7 @@ public abstract class ReflectionUtils {
     /** when member parameter types assignable to given {@code types} */
     public static Predicate<Member> withParametersAssignableTo(final Class... types) {
         return new Predicate<Member>() {
-            public boolean apply(@Nullable Member input) {
+            public boolean test(Member input) {
                 return isAssignable(types, parameterTypes(input));
             }
         };
@@ -244,7 +247,7 @@ public abstract class ReflectionUtils {
     /** when method/constructor parameter types assignable from given {@code types} */
     public static Predicate<Member> withParametersAssignableFrom(final Class... types) {
         return new Predicate<Member>() {
-            public boolean apply(@Nullable Member input) {
+            public boolean test(Member input) {
                 return isAssignable(parameterTypes(input), types);
             }
         };
@@ -253,7 +256,7 @@ public abstract class ReflectionUtils {
     /** when method/constructor parameters count equal given {@code count} */
     public static Predicate<Member> withParametersCount(final int count) {
         return new Predicate<Member>() {
-            public boolean apply(@Nullable Member input) {
+            public boolean test(Member input) {
                 return input != null && parameterTypes(input).length == count;
             }
         };
@@ -262,12 +265,13 @@ public abstract class ReflectionUtils {
     /** when method/constructor has any parameter with an annotation matches given {@code annotations} */
     public static Predicate<Member> withAnyParameterAnnotation(final Class<? extends Annotation> annotationClass) {
         return new Predicate<Member>() {
-            public boolean apply(@Nullable Member input) {
-                return input != null && Iterables.any(annotationTypes(parameterAnnotations(input)), new Predicate<Class<? extends Annotation>>() {
-                    public boolean apply(@Nullable Class<? extends Annotation> input) {
-                        return input.equals(annotationClass);
-                    }
-                });
+            public boolean test(Member input) {
+                return input != null && annotationTypes(parameterAnnotations(input)).stream()
+                        .anyMatch(new Predicate<Class<? extends Annotation>>() {
+                            public boolean test(Class<? extends Annotation> input) {
+                                return input.equals(annotationClass);
+                            };
+                        });
             }
         };
     }
@@ -275,9 +279,9 @@ public abstract class ReflectionUtils {
     /** when method/constructor has any parameter with an annotation matches given {@code annotations}, including member matching */
     public static Predicate<Member> withAnyParameterAnnotation(final Annotation annotation) {
         return new Predicate<Member>() {
-            public boolean apply(@Nullable Member input) {
-                return input != null && Iterables.any(parameterAnnotations(input), new Predicate<Annotation>() {
-                    public boolean apply(@Nullable Annotation input) {
+            public boolean test(Member input) {
+                return input != null && parameterAnnotations(input).stream().anyMatch(new Predicate<Annotation>() {
+                    public boolean test(Annotation input) {
                         return areAnnotationMembersMatching(annotation, input);
                     }
                 });
@@ -288,7 +292,7 @@ public abstract class ReflectionUtils {
     /** when field type equal given {@code type} */
     public static <T> Predicate<Field> withType(final Class<T> type) {
         return new Predicate<Field>() {
-            public boolean apply(@Nullable Field input) {
+            public boolean test(Field input) {
                 return input != null && input.getType().equals(type);
             }
         };
@@ -297,7 +301,7 @@ public abstract class ReflectionUtils {
     /** when field type assignable to given {@code type} */
     public static <T> Predicate<Field> withTypeAssignableTo(final Class<T> type) {
         return new Predicate<Field>() {
-            public boolean apply(@Nullable Field input) {
+            public boolean test(Field input) {
                 return input != null && type.isAssignableFrom(input.getType());
             }
         };
@@ -306,7 +310,7 @@ public abstract class ReflectionUtils {
     /** when method return type equal given {@code type} */
     public static <T> Predicate<Method> withReturnType(final Class<T> type) {
         return new Predicate<Method>() {
-            public boolean apply(@Nullable Method input) {
+            public boolean test(Method input) {
                 return input != null && input.getReturnType().equals(type);
             }
         };
@@ -315,7 +319,7 @@ public abstract class ReflectionUtils {
     /** when method return type assignable from given {@code type} */
     public static <T> Predicate<Method> withReturnTypeAssignableTo(final Class<T> type) {
         return new Predicate<Method>() {
-            public boolean apply(@Nullable Method input) {
+            public boolean test(Method input) {
                 return input != null && type.isAssignableFrom(input.getReturnType());
             }
         };
@@ -329,7 +333,7 @@ public abstract class ReflectionUtils {
      */
     public static <T extends Member> Predicate<T> withModifier(final int mod) {
         return new Predicate<T>() {
-            public boolean apply(@Nullable T input) {
+            public boolean test(T input) {
                 return input != null && (input.getModifiers() & mod) != 0;
             }
         };
@@ -343,7 +347,7 @@ public abstract class ReflectionUtils {
      */
     public static Predicate<Class<?>> withClassModifier(final int mod) {
         return new Predicate<Class<?>>() {
-            public boolean apply(@Nullable Class<?> input) {
+            public boolean test(Class<?> input) {
                 return input != null && (input.getModifiers() & mod) != 0;
             }
         };
@@ -374,7 +378,7 @@ public abstract class ReflectionUtils {
                 type = typeName;
             }
 
-            List<ReflectionsException> reflectionsExceptions = Lists.newArrayList();
+            List<ReflectionsException> reflectionsExceptions = new ArrayList();
             for (ClassLoader classLoader : ClasspathHelper.classLoaders(classLoaders)) {
                 if (type.contains("[")) {
                     try { return Class.forName(type, false, classLoader); }
@@ -388,9 +392,9 @@ public abstract class ReflectionUtils {
                 }
             }
 
-            if (Reflections.log != null) {
+            if (Reflections.log.get() != null) {
                 for (ReflectionsException reflectionsException : reflectionsExceptions) {
-                    Reflections.log.warn("could not get type for name " + typeName + " from any class loader",
+                    Reflections.log.get().warn("could not get type for name " + typeName + " from any class loader",
                             reflectionsException);
                 }
             }
@@ -418,7 +422,7 @@ public abstract class ReflectionUtils {
     }
 
     private static Set<Annotation> parameterAnnotations(Member member) {
-        Set<Annotation> result = Sets.newHashSet();
+        Set<Annotation> result = new HashSet();
         Annotation[][] annotations =
                 member instanceof Method ? ((Method) member).getParameterAnnotations() :
                 member instanceof Constructor ? ((Constructor) member).getParameterAnnotations() : null;
@@ -427,7 +431,7 @@ public abstract class ReflectionUtils {
     }
 
     private static Set<Class<? extends Annotation>> annotationTypes(Iterable<Annotation> annotations) {
-        Set<Class<? extends Annotation>> result = Sets.newHashSet();
+        Set<Class<? extends Annotation>> result = new HashSet();
         for (Annotation annotation : annotations) result.add(annotation.annotationType());
         return result;
     }
@@ -445,9 +449,9 @@ public abstract class ReflectionUtils {
 
     private static void initPrimitives() {
         if (primitiveNames == null) {
-            primitiveNames = Lists.newArrayList("boolean", "char", "byte", "short", "int", "long", "float", "double", "void");
-            primitiveTypes = Lists.<Class>newArrayList(boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class, void.class);
-            primitiveDescriptors = Lists.newArrayList("Z", "C", "B", "S", "I", "J", "F", "D", "V");
+            primitiveNames = Arrays.asList("boolean", "char", "byte", "short", "int", "long", "float", "double", "void");
+            primitiveTypes = Arrays.asList(boolean.class, char.class, byte.class, short.class, int.class, long.class, float.class, double.class, void.class);
+            primitiveDescriptors = Arrays.asList("Z", "C", "B", "S", "I", "J", "F", "D", "V");
         }
     }
 
@@ -455,15 +459,27 @@ public abstract class ReflectionUtils {
     private static List<Class> getPrimitiveTypes() { initPrimitives(); return primitiveTypes; }
     private static List<String> getPrimitiveDescriptors() { initPrimitives(); return primitiveDescriptors; }
 
+    static <T> Predicate<? super T> andPredicateArray(Predicate<? super T>[] predicates) {
+        Predicate<? super T> p = new AlwaysTruePredicate<>();
+        for (Predicate x: predicates) {
+            p = p.and(x);
+        }
+        return p;
+
+    }
+
     //
     static <T> Set<T> filter(final T[] elements, Predicate<? super T>... predicates) {
-        return isEmpty(predicates) ? Sets.newHashSet(elements) :
-                Sets.newHashSet(Iterables.filter(Arrays.asList(elements), Predicates.and(predicates)));
+        Stream<T> elemStream = Arrays.stream(elements);
+
+        return (isEmpty(predicates) ? elemStream : elemStream.filter(andPredicateArray(predicates)))
+                .collect(Collectors.toSet());
     }
 
     static <T> Set<T> filter(final Iterable<T> elements, Predicate<? super T>... predicates) {
-        return isEmpty(predicates) ? Sets.newHashSet(elements) :
-                Sets.newHashSet(Iterables.filter(elements, Predicates.and(predicates)));
+        Stream<T> elemStream = StreamSupport.stream(elements.spliterator(), false);
+        return (isEmpty(predicates) ? elemStream : elemStream.filter(andPredicateArray(predicates)))
+                .collect(Collectors.toSet());
     }
 
     private static boolean areAnnotationMembersMatching(Annotation annotation1, Annotation annotation2) {

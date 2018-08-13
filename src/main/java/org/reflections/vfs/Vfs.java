@@ -99,8 +99,8 @@ public abstract class Vfs {
                     if (dir != null) return dir;
                 }
             } catch (Throwable e) {
-                if (Reflections.log != null) {
-                    Reflections.log.warn("could not create Dir using " + type + " from url " + url.toExternalForm() + ". skipping.", e);
+                if (Reflections.log.isPresent()) {
+                    Reflections.log.get().warn("could not create Dir using " + type + " from url " + url.toExternalForm() + ". skipping.", e);
                 }
             }
         }
@@ -147,8 +147,8 @@ public abstract class Vfs {
                     }
                 });
             } catch (Throwable e) {
-                if (Reflections.log != null) {
-                    Reflections.log.error("could not findFiles for url. continuing. [" + url + "]", e);
+                if (Reflections.log.isPresent()) {
+                    Reflections.log.get().error("could not findFiles for url. continuing. [" + url + "]", e);
                 }
             }
         }

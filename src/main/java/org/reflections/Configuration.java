@@ -1,11 +1,9 @@
 package org.reflections;
 
-import com.google.common.base.Predicate;
 import org.reflections.adapters.MetadataAdapter;
 import org.reflections.scanners.Scanner;
 import org.reflections.serializers.Serializer;
 
-import javax.annotation.Nullable;
 import java.net.URL;
 import java.util.Optional;
 import java.util.Set;
@@ -31,7 +29,7 @@ public interface Configuration {
     Optional<Predicate<String>> getInputsFilter();
 
     /** executor service used to scan files. if null, scanning is done in a simple for loop */
-    ExecutorService getExecutorService();
+    Optional<ExecutorService> getExecutorService();
 
     /** the default serializer to use when saving Reflection */
     Serializer getSerializer();

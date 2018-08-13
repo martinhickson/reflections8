@@ -13,7 +13,7 @@ public class TypeAnnotationsScanner extends AbstractScanner {
 
             if (acceptResult(annotationType) ||
                 annotationType.equals(Inherited.class.getName())) { //as an exception, accept Inherited as well
-                getStore().put(annotationType, className);
+                getStore().putSingle(annotationType, className);
             }
         }
     }

@@ -9,7 +9,7 @@ public class MethodAnnotationsScanner extends AbstractScanner {
         for (Object method : getMetadataAdapter().getMethods(cls)) {
             for (String methodAnnotation : (List<String>) getMetadataAdapter().getMethodAnnotationNames(method)) {
                 if (acceptResult(methodAnnotation)) {
-                    getStore().put(methodAnnotation, getMetadataAdapter().getMethodFullKey(cls, method));
+                    getStore().putSingle(methodAnnotation, getMetadataAdapter().getMethodFullKey(cls, method));
                 }
             }
         }

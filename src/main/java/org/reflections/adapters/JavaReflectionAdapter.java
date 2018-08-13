@@ -1,11 +1,9 @@
 package org.reflections.adapters;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
+import org.reflections.util.Joiner;
 import org.reflections.util.Utils;
 import org.reflections.vfs.Vfs;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.ArrayList;
@@ -18,11 +16,11 @@ import static org.reflections.ReflectionUtils.forName;
 public class JavaReflectionAdapter implements MetadataAdapter<Class, Field, Member> {
 
     public List<Field> getFields(Class cls) {
-        return Lists.newArrayList(cls.getDeclaredFields());
+        return Arrays.asList(cls.getDeclaredFields());
     }
 
     public List<Member> getMethods(Class cls) {
-        List<Member> methods = Lists.newArrayList();
+        List<Member> methods = new ArrayList();
         methods.addAll(Arrays.asList(cls.getDeclaredMethods()));
         methods.addAll(Arrays.asList(cls.getDeclaredConstructors()));
         return methods;
@@ -34,7 +32,7 @@ public class JavaReflectionAdapter implements MetadataAdapter<Class, Field, Memb
     }
 
     public List<String> getParameterNames(final Member member) {
-        List<String> result = Lists.newArrayList();
+        List<String> result = new ArrayList();
 
         Class<?>[] parameterTypes = member instanceof Method ? ((Method) member).getParameterTypes() :
                 member instanceof Constructor ? ((Constructor) member).getParameterTypes() : null;
@@ -84,7 +82,7 @@ public class JavaReflectionAdapter implements MetadataAdapter<Class, Field, Memb
         return getOrCreateClassObject(file, null);
     }
 
-    public Class getOrCreateClassObject(Vfs.File file, @Nullable ClassLoader... loaders) throws Exception {
+    public Class getOrCreateClassObject(Vfs.File file, ClassLoader... loaders) throws Exception {
         String name = file.getRelativePath().replace("/", ".").replace(".class", "");
         return forName(name, loaders);
     }

@@ -1,10 +1,9 @@
 package org.reflections.scanners;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.bytecode.MethodInfo;
 import org.reflections.adapters.MetadataAdapter;
+import org.reflections.util.Joiner;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ public class MethodParameterNamesScanner extends AbstractScanner {
                 if (i < length) {
                     List<String> names = new ArrayList<String>(length - i);
                     while (i < length) names.add(((MethodInfo) method).getConstPool().getUtf8Info(table.nameIndex(i++)));
-                    getStore().put(key, Joiner.on(", ").join(names));
+                    getStore().putSingle(key, Joiner.on(", ").join(names));
                 }
             }
         }

@@ -137,8 +137,8 @@ public abstract class Utils {
     public static void close(InputStream closeable) {
         try { if (closeable != null) closeable.close(); }
         catch (IOException e) {
-            if (Reflections.log != null) {
-                Reflections.log.warn("Could not close InputStream", e);
+            if (Reflections.log.isPresent()) {
+                Reflections.log.get().warn("Could not close InputStream", e);
             }
         }
     }

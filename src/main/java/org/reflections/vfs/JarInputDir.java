@@ -1,6 +1,7 @@
 package org.reflections.vfs;
 
 import org.reflections.ReflectionsException;
+import org.reflections.util.AbstractIterator;
 import org.reflections.util.Utils;
 
 import java.io.IOException;
@@ -32,43 +33,31 @@ public class JarInputDir implements Vfs.Dir {
     public Iterable<Vfs.File> getFiles() {
         return new Iterable<Vfs.File>() {
             public Iterator<Vfs.File> iterator() {
-                return new Iterator<Vfs.File>() {
-                    ZipEntry entry = null;
+                return new AbstractIterator<Vfs.File>() {
 
                     {
                         try { jarInputStream = new JarInputStream(url.openConnection().getInputStream()); }
                         catch (Exception e) { throw new ReflectionsException("Could not open url connection", e); }
                     }
 
-                    public Vfs.File next() {
+                    protected Vfs.File computeNext() {
                         while (true) {
-
-                            if (entry == null) {
-                                if (!hasNext()) {
-                                    throw new NoSuchElementException("nothing left");
-                                }
-                            }
-                            ZipEntry tmp = entry;
-                            entry = null;
-                            long size = tmp.getSize();
-                            if (size < 0) size = 0xffffffffl + size; //JDK-6916399
-                            nextCursor += size;
-                            if (!tmp.isDirectory()) {
-                                return new JarInputFile(tmp, JarInputDir.this, cursor, nextCursor);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public boolean hasNext() {
-                        if (entry == null) {
                             try {
-                                entry = jarInputStream.getNextJarEntry();
+                                ZipEntry entry = jarInputStream.getNextJarEntry();
+                                if (entry == null) {
+                                    return endOfData();
+                                }
+
+                                long size = entry.getSize();
+                                if (size < 0) size = 0xffffffffl + size; //JDK-6916399
+                                nextCursor += size;
+                                if (!entry.isDirectory()) {
+                                    return new JarInputFile(entry, JarInputDir.this, cursor, nextCursor);
+                                }
                             } catch (IOException e) {
                                 throw new ReflectionsException("could not get next zip entry", e);
                             }
                         }
-                        return entry != null;
                     }
                 };
             }

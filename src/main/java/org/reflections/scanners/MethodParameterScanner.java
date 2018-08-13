@@ -16,19 +16,19 @@ public class MethodParameterScanner extends AbstractScanner {
 
             String signature = md.getParameterNames(method).toString();
             if (acceptResult(signature)) {
-                getStore().put(signature, md.getMethodFullKey(cls, method));
+                getStore().putSingle(signature, md.getMethodFullKey(cls, method));
             }
 
             String returnTypeName = md.getReturnTypeName(method);
             if (acceptResult(returnTypeName)) {
-                getStore().put(returnTypeName, md.getMethodFullKey(cls, method));
+                getStore().putSingle(returnTypeName, md.getMethodFullKey(cls, method));
             }
 
             List<String> parameterNames = md.getParameterNames(method);
             for (int i = 0; i < parameterNames.size(); i++) {
                 for (Object paramAnnotation : md.getParameterAnnotationNames(method, i)) {
                     if (acceptResult((String) paramAnnotation)) {
-                        getStore().put((String) paramAnnotation, md.getMethodFullKey(cls, method));
+                        getStore().putSingle((String) paramAnnotation, md.getMethodFullKey(cls, method));
                     }
                 }
             }

@@ -1,12 +1,15 @@
 package org.reflections.scanners;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Multimap;
 import org.reflections.Configuration;
 import org.reflections.ReflectionsException;
 import org.reflections.adapters.MetadataAdapter;
+import org.reflections.util.AlwaysTruePredicate;
+import org.reflections.util.Multimap;
+import org.reflections.util.SetMultimap;
 import org.reflections.vfs.Vfs;
+
+import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  *
@@ -15,23 +18,23 @@ import org.reflections.vfs.Vfs;
 public abstract class AbstractScanner implements Scanner {
 
 	private Configuration configuration;
-	private Multimap<String, String> store;
-	private Predicate<String> resultFilter = Predicates.alwaysTrue(); //accept all by default
+	private SetMultimap<String, String> store;
+	private Predicate<String> resultFilter = new AlwaysTruePredicate(); //accept all by default
 
     public boolean acceptsInput(String file) {
         return getMetadataAdapter().acceptsInput(file);
     }
 
-    public Object scan(Vfs.File file, Object classObject) {
-        if (classObject == null) {
+    public Object scan(Vfs.File file, Optional<Object> classObject) {
+        if (!classObject.isPresent()) {
             try {
-                classObject = configuration.getMetadataAdapter().getOrCreateClassObject(file);
+                classObject = Optional.of(configuration.getMetadataAdapter().getOrCreateClassObject(file));
             } catch (Exception e) {
                 throw new ReflectionsException("could not create class object from file " + file.getRelativePath(), e);
             }
         }
-        scan(classObject);
-        return classObject;
+        scan(classObject.get());
+        return classObject.get();
     }
 
     public abstract void scan(Object cls);
@@ -45,11 +48,11 @@ public abstract class AbstractScanner implements Scanner {
         this.configuration = configuration;
     }
 
-    public Multimap<String, String> getStore() {
+    public SetMultimap<String, String> getStore() {
         return store;
     }
 
-    public void setStore(final Multimap<String, String> store) {
+    public void setStore(final SetMultimap<String, String> store) {
         this.store = store;
     }
 
@@ -67,7 +70,7 @@ public abstract class AbstractScanner implements Scanner {
 
     //
     public boolean acceptResult(final String fqn) {
-		return fqn != null && resultFilter.apply(fqn);
+		return fqn != null && resultFilter.test(fqn);
 	}
 
 	protected MetadataAdapter getMetadataAdapter() {

@@ -231,7 +231,7 @@ public class ReflectionsTest {
     @Test
     public void testMethodParameterNames() throws NoSuchMethodException {
         assertEquals(reflections.getMethodParamNames(C4.class.getDeclaredMethod("m3")),
-                Lists.newArrayList());
+                new ArrayList());
 
         assertEquals(reflections.getMethodParamNames(C4.class.getDeclaredMethod("m4", String.class)),
                 Lists.newArrayList("string"));

@@ -26,12 +26,12 @@ public class SubTypesScanner extends AbstractScanner {
 		String superclass = getMetadataAdapter().getSuperclassName(cls);
 
         if (acceptResult(superclass)) {
-            getStore().put(superclass, className);
+            getStore().putSingle(superclass, className);
         }
 
 		for (String anInterface : (List<String>) getMetadataAdapter().getInterfacesNames(cls)) {
 			if (acceptResult(anInterface)) {
-                getStore().put(anInterface, className);
+                getStore().putSingle(anInterface, className);
             }
         }
     }

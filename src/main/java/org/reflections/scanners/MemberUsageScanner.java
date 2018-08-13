@@ -1,11 +1,13 @@
 package org.reflections.scanners;
 
-import com.google.common.base.Joiner;
 import javassist.*;
 import javassist.bytecode.MethodInfo;
 import javassist.expr.*;
 import org.reflections.ReflectionsException;
 import org.reflections.util.ClasspathHelper;
+import org.reflections.util.Joiner;
+
+import java.util.Optional;
 
 /** scans methods/constructors/fields usage
  * <p><i> depends on {@link org.reflections.adapters.JavassistAdapter} configured </i>*/
@@ -77,7 +79,7 @@ public class MemberUsageScanner extends AbstractScanner {
 
     private void put(String key, int lineNumber, String value) {
         if (acceptResult(key)) {
-            getStore().put(key, value + " #" + lineNumber);
+            getStore().putSingle(key, value + " #" + lineNumber);
         }
     }
 
@@ -89,11 +91,11 @@ public class MemberUsageScanner extends AbstractScanner {
         if (classPool == null) {
             synchronized (this) {
                 classPool = new ClassPool();
-                ClassLoader[] classLoaders = getConfiguration().getClassLoaders();
-                if (classLoaders == null) {
-                    classLoaders = ClasspathHelper.classLoaders();
+                Optional<ClassLoader[]> classLoaders = getConfiguration().getClassLoaders();
+                if (!classLoaders.isPresent()) {
+                    classLoaders = Optional.of(ClasspathHelper.classLoaders());
                 }
-                for (ClassLoader classLoader : classLoaders) {
+                for (ClassLoader classLoader : classLoaders.get()) {
                     classPool.appendClassPath(new LoaderClassPath(classLoader));
                 }
             }

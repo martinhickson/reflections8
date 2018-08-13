@@ -54,7 +54,7 @@ public class XmlSerializer implements Serializer {
                     Element values = entry.element("values");
                     for (Object o3 : values.elements()) {
                         Element value = (Element) o3;
-                        reflections.getStore().getOrCreate(index.getName()).put(key.getText(), value.getText());
+                        reflections.getStore().getOrCreate(index.getName()).putSingle(key.getText(), value.getText());
                     }
                 }
             }

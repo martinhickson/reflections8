@@ -41,9 +41,9 @@ public class UrlTypeVFS implements UrlType {
             try {
                 return new ZipDir(new JarFile(url.getFile()));
             } catch (IOException e1) {
-                if (Reflections.log != null) {
-                    Reflections.log.warn("Could not get URL", e);
-                    Reflections.log.warn("Could not get URL", e1);
+                if (Reflections.log.isPresent()) {
+                    Reflections.log.get().warn("Could not get URL", e);
+                    Reflections.log.get().warn("Could not get URL", e1);
                 }
             }
         }
