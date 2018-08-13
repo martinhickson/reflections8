@@ -190,7 +190,7 @@ public abstract class Vfs {
         } catch (Exception e) {
         }
 
-        return null;
+        return Optional.empty();
     }
     
     private static boolean hasJarFileInPath(URL url) {
@@ -248,7 +248,8 @@ public abstract class Vfs {
             }
 
             public Dir createDir(final URL url) throws Exception {
-                return new SystemDir(getFile(url).get());
+                final Optional<java.io.File> file = getFile(url);
+                return new SystemDir(file.isPresent() ? file.get() : null);
             }
         },
 

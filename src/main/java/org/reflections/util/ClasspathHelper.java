@@ -56,7 +56,7 @@ public abstract class ClasspathHelper {
     }
 
     public static Optional<ClassLoader[]> classLoaders(Optional<ClassLoader[]> classLoaders) {
-        if (classLoaders.isPresent()) {
+        if (classLoaders.isPresent() && classLoaders.get().length > 0) {
             return classLoaders;
         } else {
             ClassLoader contextClassLoader = contextClassLoader(), staticClassLoader = staticClassLoader();

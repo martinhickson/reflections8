@@ -2,6 +2,8 @@ package org.reflections;
 
 import org.reflections.util.Multimap;
 import org.reflections.util.SetMultimap;
+import org.reflections.util.SynchronizedSetMultimap;
+
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.*;
@@ -49,12 +51,7 @@ public class Store {
                                 return Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
                             }
                         });
-            if (concurrent)
-                throw new NotImplementedException();
-            else {
-                mmap = multimap;
-            }
-            // map = concurrent ? new SynchronizedSetMultimap<String, String>(multimap) : multimap;
+            mmap = concurrent ? new SynchronizedSetMultimap<String, String>(multimap) : multimap;
             storeMap.put(index,mmap);
         }
         return mmap;

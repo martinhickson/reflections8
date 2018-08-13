@@ -402,7 +402,7 @@ public abstract class ReflectionUtils {
                 }
             }
 
-            if (Reflections.log.get() != null) {
+            if (Reflections.log.isPresent()) {
                 for (ReflectionsException reflectionsException : reflectionsExceptions) {
                     Reflections.log.get().warn("could not get type for name " + typeName + " from any class loader",
                             reflectionsException);

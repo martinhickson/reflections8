@@ -214,7 +214,7 @@ public class ReflectionsTest {
 
     @Test
     public void testResourcesScanner() {
-        Predicate<String> filter = new FilterBuilder().include(".*\\.xml").exclude(".*testModel-reflections\\.xml");
+        Predicate<String> filter = new FilterBuilder().include(".*\\.xml").exclude(".*testModel-reflections.*\\.xml");
         Reflections reflections = new Reflections(new ConfigurationBuilder()
                 .filterInputsBy(filter)
                 .setScanners(new ResourcesScanner())

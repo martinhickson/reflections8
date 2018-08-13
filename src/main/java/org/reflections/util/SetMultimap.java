@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 public class SetMultimap<T,V> extends HashMap<T, Set<V>> {
+    private static final long serialVersionUID = 140511307437539771L;
     private final Supplier<Set<V>> setSupplier;
 
     public SetMultimap() {
@@ -45,5 +46,21 @@ public class SetMultimap<T,V> extends HashMap<T, Set<V>> {
             }
             return res;
         }
+    }
+
+    public Collection<V> flatValues() {
+        ArrayList<V> res = new ArrayList<>();
+        for (Set<V> s: values()) {
+            res.addAll(s);
+        }
+        return res;
+    }
+
+    public Set<V> flatValuesAsSet() {
+        HashSet<V> res = new HashSet<>();
+        for (Set<V> s: values()) {
+            res.addAll(s);
+        }
+        return res;
     }
 }

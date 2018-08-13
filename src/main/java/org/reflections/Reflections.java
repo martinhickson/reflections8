@@ -174,11 +174,11 @@ public class  Reflections {
     //
     protected void scan() {
         if (configuration.getUrls() == null || configuration.getUrls().isEmpty()) {
-            if (log != null) log.get().warn("given scan urls are empty. set urls in the configuration");
+            if (log.isPresent()) log.get().warn("given scan urls are empty. set urls in the configuration");
             return;
         }
 
-        if (log != null && log.get().isDebugEnabled()) {
+        if (log.isPresent() && log.get().isDebugEnabled()) {
             log.get().debug("going to scan these urls:\n{}", Joiner.on("\n").join(configuration.getUrls()));
         }
 
@@ -192,7 +192,7 @@ public class  Reflections {
                 if (executorService.isPresent()) {
                     futures.add(executorService.get().submit(new Runnable() {
                         public void run() {
-                            if (log != null) {
+                            if (log.isPresent()) {
                                 log.get().debug("[{}] scanning {}", Thread.currentThread().toString(), url);
                             }
                             scan(url);
@@ -203,14 +203,14 @@ public class  Reflections {
                 }
                 scannedUrls++;
             } catch (ReflectionsException e) {
-                if (log != null) {
+                if (log.isPresent()) {
                     log.get().warn("could not create Vfs.Dir from url. ignoring the exception and continuing", e);
                 }
             }
         }
 
         //todo use CompletionService
-        if (executorService != null) {
+        if (executorService.isPresent()) {
             for (Future future : futures) {
                 try { future.get(); } catch (Exception e) { throw new RuntimeException(e); }
             }
@@ -223,12 +223,14 @@ public class  Reflections {
             executorService.get().shutdown();
         }
 
-        if (log != null) {
+        if (log.isPresent()) {
             int keys = 0;
             int values = 0;
             for (String index : store.keySet()) {
                 keys += store.get(index).keySet().size();
-                values += store.get(index).size();
+                for (Collection c: store.get(index).values()) {
+                    values += c.size();
+                }
             }
 
             log.get().info(format("Reflections took %d ms to scan %d urls, producing %d keys and %d values %s",
@@ -257,7 +259,7 @@ public class  Reflections {
                         } catch (Exception e) {
                             if (log.isPresent()) {
                                 // SLF4J will filter out Throwables from the format string arguments.
-                                log.get().error("could not scan file {} in url {} with scanner {}", file.getRelativePath(), url.toExternalForm(), scanner.getClass().getSimpleName(), e);
+                                log.get().debug("could not scan file {} in url {} with scanner {}", file.getRelativePath(), url.toExternalForm(), scanner.getClass().getSimpleName(), e);
                             }
                         }
                     }
@@ -304,7 +306,7 @@ public class  Reflections {
             }
         }
 
-        if (log != null) {
+        if (log.isPresent()) {
             Store store = reflections.getStore();
             int keys = 0;
             int values = 0;
@@ -325,7 +327,7 @@ public class  Reflections {
     public Reflections collect(final InputStream inputStream) {
         try {
             merge(configuration.getSerializer().read(inputStream));
-            if (log != null) log.get().info("Reflections collected metadata from input stream using serializer " + configuration.getSerializer().getClass().getName());
+            if (log.isPresent()) log.get().info("Reflections collected metadata from input stream using serializer " + configuration.getSerializer().getClass().getName());
         } catch (Exception ex) {
             throw new ReflectionsException("could not merge input stream", ex);
         }
@@ -379,23 +381,24 @@ public class  Reflections {
     public void expandSuperTypes() {
         if (store.keySet().contains(index(SubTypesScanner.class))) {
             SetMultimap<String, String> mmap = store.get(index(SubTypesScanner.class));
-            throw new NotImplementedException();
-//            Sets.SetView<String> keys = Sets.difference(mmap.keySet(), new HashSet(mmap.values()));
-//            SetMultimap<String, String> expand = new SetMultimap<>();
-//            for (String key : keys) {
-//                final Class<?> type = forName(key, loaders());
-//                if (type != null) {
-//                    expandSupertypes(expand, key, type);
-//                }
-//            }
-//            mmap.putAll(expand);
+            Set<String> difference = new HashSet<>();
+            difference.addAll(mmap.keySet());
+            difference.removeAll(mmap.flatValuesAsSet());
+            SetMultimap<String, String> expand = new SetMultimap<>();
+            for (String key : difference) {
+                final Class<?> type = forName(key, loaders());
+                if (type != null) {
+                    expandSupertypes(expand, key, type);
+                }
+            }
+            mmap.putAll(expand);
         }
     }
 
     private void expandSupertypes(SetMultimap<String, String> mmap, String key, Class<?> type) {
         for (Class<?> supertype : ReflectionUtils.getSuperTypes(type)) {
             if (mmap.putSingle(supertype.getName(), key)) {
-                if (log != null) log.get().debug("expanded subtype {} -> {}", supertype.getName(), key);
+                if (log.isPresent()) log.get().debug("expanded subtype {} -> {}", supertype.getName(), key);
                 expandSupertypes(mmap, supertype.getName(), supertype);
             }
         }
@@ -685,7 +688,7 @@ public class  Reflections {
      */
     public File save(final String filename, final Serializer serializer) {
         File file = serializer.save(this, filename);
-        if (log != null) //noinspection ConstantConditions
+        if (log.isPresent()) //noinspection ConstantConditions
             log.get().info("Reflections successfully saved in " + file.getAbsolutePath() + " using " + serializer.getClass().getSimpleName());
         return file;
     }

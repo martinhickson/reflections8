@@ -110,7 +110,7 @@ public class ConfigurationBuilder implements Configuration {
                 filter.add((Predicate<String>) param);
             } else if (param instanceof ExecutorService) {
                 builder.setExecutorService((ExecutorService) param);
-            } else if (Reflections.log != null) {
+            } else if (Reflections.log.isPresent()) {
                 throw new ReflectionsException("could not use param " + param);
             }
         }
