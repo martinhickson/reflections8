@@ -1,19 +1,26 @@
 package org.reflections.vfs;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.JarURLConnection;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.jar.JarFile;
+
 import org.reflections.Reflections;
 import org.reflections.ReflectionsException;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.Utils;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.*;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-import java.util.jar.JarFile;
 
 /**
  * a simple virtual file system bridge
@@ -22,7 +29,7 @@ import java.util.jar.JarFile;
  * <p>for example:
  * <pre>
  *      Vfs.Dir dir = Vfs.fromURL(url);
- *      Iterable<Vfs.File> files = dir.getFiles();
+ *      Iterable&lt;Vfs.File&gt; files = dir.getFiles();
  *      for (Vfs.File file : files) {
  *          InputStream is = file.openInputStream();
  *      }

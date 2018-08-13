@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Helper class used to avoid guava
+ *
  * @author aschoerk
  */
 public interface SetMultimap<T, V> extends Map<T, Set<V>> {

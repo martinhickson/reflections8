@@ -82,9 +82,9 @@ import org.slf4j.Logger;
  * <pre>
  *      Reflections reflections = new Reflections("my.project.prefix");
  *
- *      Set&#60Class&#60? extends SomeType>> subTypes = reflections.getSubTypesOf(SomeType.class);
+ *      Set&lt;Class&lt;? extends SomeType&gt;&gt; subTypes = reflections.getSubTypesOf(SomeType.class);
  *
- *      Set&#60Class&#60?>> annotated = reflections.getTypesAnnotatedWith(SomeAnnotation.class);
+ *      Set&lt;Class&lt;?&gt;&gt; annotated = reflections.getTypesAnnotatedWith(SomeAnnotation.class);
  * </pre>
  * <p>Basically, to use Reflections first instantiate it with one of the constructors, then depending on the scanners, use the convenient query methods:
  * <pre>
@@ -101,23 +101,23 @@ import org.slf4j.Logger;
  * </pre>
  * And then query, for example:
  * <pre>
- *       Set&#60Class&#60? extends Module>> modules = reflections.getSubTypesOf(com.google.inject.Module.class);
- *       Set&#60Class&#60?>> singletons =             reflections.getTypesAnnotatedWith(javax.inject.Singleton.class);
+ *       Set&lt;Class&lt;? extends Module&gt;&gt; modules = reflections.getSubTypesOf(com.google.inject.Module.class);
+ *       Set&lt;Class&lt;?&gt;&gt; singletons =             reflections.getTypesAnnotatedWith(javax.inject.Singleton.class);
  *
- *       Set&#60String> properties =       reflections.getResources(Pattern.compile(".*\\.properties"));
- *       Set&#60Constructor> injectables = reflections.getConstructorsAnnotatedWith(javax.inject.Inject.class);
- *       Set&#60Method> deprecateds =      reflections.getMethodsAnnotatedWith(javax.ws.rs.Path.class);
- *       Set&#60Field> ids =               reflections.getFieldsAnnotatedWith(javax.persistence.Id.class);
+ *       Set&lt;String&gt; properties =       reflections.getResources(Pattern.compile(".*\\.properties"));
+ *       Set&lt;Constructor&gt; injectables = reflections.getConstructorsAnnotatedWith(javax.inject.Inject.class);
+ *       Set&lt;Method&gt; deprecateds =      reflections.getMethodsAnnotatedWith(javax.ws.rs.Path.class);
+ *       Set&lt;Field&gt; ids =               reflections.getFieldsAnnotatedWith(javax.persistence.Id.class);
  *
- *       Set&#60Method> someMethods =      reflections.getMethodsMatchParams(long.class, int.class);
- *       Set&#60Method> voidMethods =      reflections.getMethodsReturn(void.class);
- *       Set&#60Method> pathParamMethods = reflections.getMethodsWithAnyParamAnnotated(PathParam.class);
- *       Set&#60Method> floatToString =    reflections.getConverters(Float.class, String.class);
- *       List&#60String> parameterNames =  reflections.getMethodsParamNames(Method.class);
+ *       Set&lt;Method&gt; someMethods =      reflections.getMethodsMatchParams(long.class, int.class);
+ *       Set&lt;Method&gt; voidMethods =      reflections.getMethodsReturn(void.class);
+ *       Set&lt;Method&gt; pathParamMethods = reflections.getMethodsWithAnyParamAnnotated(PathParam.class);
+ *       Set&lt;Method&gt; floatToString =    reflections.getConverters(Float.class, String.class);
+ *       List&lt;String&gt; parameterNames =  reflections.getMethodsParamNames(Method.class);
  *
- *       Set&#60Member> fieldUsage =       reflections.getFieldUsage(Field.class);
- *       Set&#60Member> methodUsage =      reflections.getMethodUsage(Method.class);
- *       Set&#60Member> constructorUsage = reflections.getConstructorUsage(Constructor.class);
+ *       Set&lt;Member&gt; fieldUsage =       reflections.getFieldUsage(Field.class);
+ *       Set&lt;Member&gt; methodUsage =      reflections.getMethodUsage(Method.class);
+ *       Set&lt;Member&gt; constructorUsage = reflections.getConstructorUsage(Constructor.class);
  * </pre>
  * <p>You can use other scanners defined in Reflections as well, such as: SubTypesScanner, TypeAnnotationsScanner (both default),
  * ResourcesScanner, MethodAnnotationsScanner, ConstructorAnnotationsScanner, FieldAnnotationsScanner,
@@ -409,8 +409,8 @@ public class  Reflections {
      * <p>
      * for example, for classes A,B,C where A supertype of B, B supertype of C:
      * <ul>
-     *     <li>if scanning C resulted in B (B->C in store), but A was not scanned (although A supertype of B) - then getSubTypes(A) will not return C</li>
-     *     <li>if expanding supertypes, B will be expanded with A (A->B in store) - then getSubTypes(A) will return C</li>
+     *     <li>if scanning C resulted in B (B-&gt;C in store), but A was not scanned (although A supertype of B) - then getSubTypes(A) will not return C</li>
+     *     <li>if expanding supertypes, B will be expanded with A (A-&gt;B in store) - then getSubTypes(A) will return C</li>
      * </ul>
      */
     public void expandSuperTypes() {
@@ -442,7 +442,7 @@ public class  Reflections {
     //query
     /**
      * gets all sub types in hierarchy of a given type
-     * <p/>depends on SubTypesScanner configured
+     * <p>depends on SubTypesScanner configured
      */
     public <T> Set<Class<? extends T>> getSubTypesOf(final Class<T> type) {
         return new HashSet(ReflectionUtils.<T>forNames(
@@ -455,7 +455,7 @@ public class  Reflections {
      * <p>when honoring @Inherited, meta-annotation should only effect annotated super classes and its sub types
      * <p><i>Note that this (@Inherited) meta-annotation type has no effect if the annotated type is used for anything other then a class.
      * Also, this meta-annotation causes annotations to be inherited only from superclasses; annotations on implemented interfaces have no effect.</i>
-     * <p/>depends on TypeAnnotationsScanner and SubTypesScanner configured
+     * <p>depends on TypeAnnotationsScanner and SubTypesScanner configured
      */
     public Set<Class<?>> getTypesAnnotatedWith(final Class<? extends Annotation> annotation) {
         return getTypesAnnotatedWith(annotation, false);
@@ -468,7 +468,7 @@ public class  Reflections {
      * <p>when not honoring @Inherited, meta annotation effects all subtypes, including annotations interfaces and classes
      * <p><i>Note that this (@Inherited) meta-annotation type has no effect if the annotated type is used for anything other then a class.
      * Also, this meta-annotation causes annotations to be inherited only from superclasses; annotations on implemented interfaces have no effect.</i>
-     * <p/>depends on TypeAnnotationsScanner and SubTypesScanner configured
+     * <p>depends on TypeAnnotationsScanner and SubTypesScanner configured
      */
     public Set<Class<?>> getTypesAnnotatedWith(final Class<? extends Annotation> annotation, boolean honorInherited) {
         Iterable<String> annotated = store.get(index(TypeAnnotationsScanner.class), annotation.getName());
@@ -480,7 +480,7 @@ public class  Reflections {
     /**
      * get types annotated with a given annotation, both classes and annotations, including annotation member values matching
      * <p>{@link java.lang.annotation.Inherited} is not honored by default
-     * <p/>depends on TypeAnnotationsScanner configured
+     * <p>depends on TypeAnnotationsScanner configured
      */
     public Set<Class<?>> getTypesAnnotatedWith(final Annotation annotation) {
         return getTypesAnnotatedWith(annotation, false);
@@ -489,7 +489,7 @@ public class  Reflections {
     /**
      * get types annotated with a given annotation, both classes and annotations, including annotation member values matching
      * <p>{@link java.lang.annotation.Inherited} is honored according to given honorInherited
-     * <p/>depends on TypeAnnotationsScanner configured
+     * <p>depends on TypeAnnotationsScanner configured
      */
     public Set<Class<?>> getTypesAnnotatedWith(final Annotation annotation, boolean honorInherited) {
         Iterable<String> annotated = store.get(index(TypeAnnotationsScanner.class), annotation.annotationType().getName());
@@ -533,7 +533,7 @@ public class  Reflections {
 
     /**
      * get all methods annotated with a given annotation
-     * <p/>depends on MethodAnnotationsScanner configured
+     * <p>depends on MethodAnnotationsScanner configured
      */
     public Set<Method> getMethodsAnnotatedWith(final Class<? extends Annotation> annotation) {
         Iterable<String> methods = store.get(index(MethodAnnotationsScanner.class), annotation.getName());
@@ -542,7 +542,7 @@ public class  Reflections {
 
     /**
      * get all methods annotated with a given annotation, including annotation member values matching
-     * <p/>depends on MethodAnnotationsScanner configured
+     * <p>depends on MethodAnnotationsScanner configured
      */
     public Set<Method> getMethodsAnnotatedWith(final Annotation annotation) {
         return filter(getMethodsAnnotatedWith(annotation.annotationType()), withAnnotation(annotation));
@@ -571,7 +571,7 @@ public class  Reflections {
 
     /**
      * get all constructors annotated with a given annotation
-     * <p/>depends on MethodAnnotationsScanner configured
+     * <p>depends on MethodAnnotationsScanner configured
      */
     public Set<Constructor> getConstructorsAnnotatedWith(final Class<? extends Annotation> annotation) {
         Iterable<String> methods = store.get(index(MethodAnnotationsScanner.class), annotation.getName());
@@ -580,7 +580,7 @@ public class  Reflections {
 
     /**
      * get all constructors annotated with a given annotation, including annotation member values matching
-     * <p/>depends on MethodAnnotationsScanner configured
+     * <p>depends on MethodAnnotationsScanner configured
      */
     public Set<Constructor> getConstructorsAnnotatedWith(final Annotation annotation) {
         return filter(getConstructorsAnnotatedWith(annotation.annotationType()), withAnnotation(annotation));
@@ -603,7 +603,7 @@ public class  Reflections {
 
     /**
      * get all fields annotated with a given annotation
-     * <p/>depends on FieldAnnotationsScanner configured
+     * <p>depends on FieldAnnotationsScanner configured
      */
     public Set<Field> getFieldsAnnotatedWith(final Class<? extends Annotation> annotation) {
         final Set<Field> result =new HashSet();
@@ -615,7 +615,7 @@ public class  Reflections {
 
     /**
      * get all methods annotated with a given annotation, including annotation member values matching
-     * <p/>depends on FieldAnnotationsScanner configured
+     * <p>depends on FieldAnnotationsScanner configured
      */
     public Set<Field> getFieldsAnnotatedWith(final Annotation annotation) {
         return filter(getFieldsAnnotatedWith(annotation.annotationType()), withAnnotation(annotation));
@@ -633,7 +633,7 @@ public class  Reflections {
 
     /** get resources relative paths where simple name (key) matches given regular expression
      * <p>depends on ResourcesScanner configured
-     * <pre>Set<String> xmls = reflections.getResources(".*\\.xml");</pre>
+     * <pre>Set&lt;String&gt; xmls = reflections.getResources(".*\\.xml");</pre>
      */
     public Set<String> getResources(final Pattern pattern) {
         return getResources(new Predicate<String>() {
