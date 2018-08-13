@@ -42,7 +42,7 @@ public class JsonSerializer implements Serializer {
     private Gson gson;
 
     public Reflections read(InputStream inputStream) {
-        return getGson().fromJson(new InputStreamReader(inputStream), Reflections.class);
+        return getGson().fromJson(new InputStreamReader(inputStream, Charset.forName("UTF-8")), Reflections.class);
     }
 
     public File save(Reflections reflections, String filename) {
