@@ -1,20 +1,20 @@
 package org.reflections.util;
 
-import org.reflections.ReflectionsException;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import org.reflections.ReflectionsException;
+
 /**
  * Builds include/exclude filters for Reflections.
  * <p>
  * For example:
  * <pre>
- * Predicate<String> filter1 = FilterBuilder.parsePackages("-java, "-javax");
- * Predicate<String> filter2 = new FilterBuilder().include(".*").exclude("java.*");
+ * Predicate&lt;String&gt; filter1 = FilterBuilder.parsePackages("-java, "-javax");
+ * Predicate&lt;String&gt; filter2 = new FilterBuilder().include(".*").exclude("java.*");
  * </pre>
  */
 public class FilterBuilder implements Predicate<String> {

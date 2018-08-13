@@ -8,6 +8,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
+/**
+ * Helper class used to avoid guava
+ *
+ * @author aschoerk
+ */
 public class HashSetMultimap<T,V> extends HashMap<T, Set<V>> implements SetMultimap<T, V> {
     private static final long serialVersionUID = 140511307437539771L;
     private transient final Supplier<Set<V>> setSupplier;

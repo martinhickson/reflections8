@@ -30,7 +30,7 @@ import org.reflections.util.ClasspathHelper;
  *     1. some helper methods to get type by name: {@link #forName(String, ClassLoader...)} and {@link #forNames(Iterable, ClassLoader...)}
  * <p>
  *     2. some helper methods to get all types/methods/fields/constructors/properties matching some predicates, generally:
- *     <pre> Set&#60?> result = getAllXXX(type/s, withYYY) </pre>
+ *     <pre> Set&lt;?&gt; result = getAllXXX(type/s, withYYY) </pre>
  *     <p>where get methods are:
  *     <ul>
  *         <li>{@link #getAllSuperTypes(Class, Predicate...)}
@@ -56,7 +56,7 @@ import org.reflections.util.ClasspathHelper;
  *     <p><br>
  *      for example, getting all getters would be:
  *     <pre>
- *      Set&#60Method> getters = getAllMethods(someClasses, 
+ *      Set&lt;Method&gt; getters = getAllMethods(someClasses,
  *              Predicates.and(
  *                      withModifier(Modifier.PUBLIC), 
  *                      withPrefix("get"), 

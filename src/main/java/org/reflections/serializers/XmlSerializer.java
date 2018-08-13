@@ -1,5 +1,12 @@
 package org.reflections.serializers;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.lang.reflect.Constructor;
+
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentFactory;
@@ -13,22 +20,19 @@ import org.reflections.Store;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.Utils;
 
-import java.io.*;
-import java.lang.reflect.Constructor;
-
 /** serialization of Reflections to xml
  *
  * <p>an example of produced xml:
  * <pre>
- * &#60?xml version="1.0" encoding="UTF-8"?>
+ * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
  *
- * &#60Reflections>
- *  &#60SubTypesScanner>
- *      &#60entry>
- *          &#60key>com.google.inject.Module&#60/key>
- *          &#60values>
- *              &#60value>fully.qualified.name.1&#60/value>
- *              &#60value>fully.qualified.name.2&#60/value>
+ * &lt;Reflections&gt;
+ *  &lt;SubTypesScanner&gt;
+ *      &lt;entry&gt;
+ *          &lt;key&gt;com.google.inject.Module&lt;/key&gt;
+ *          &lt;values&gt;
+ *              &lt;value&gt;fully.qualified.name.1&lt;/value&gt;
+ *              &lt;value&gt;fully.qualified.name.2&lt;/value&gt;
  * ...
  * </pre>
  * */
