@@ -248,16 +248,16 @@ public class  Reflections {
                 String path = file.getRelativePath();
                 String fqn = path.replace('/', '.');
                 if (!inputsFilter.isPresent() || inputsFilter.get().test(path) || inputsFilter.get().test(fqn)) {
-                    Object classObject = null;
+                    Optional<Object> classObject = Optional.empty();
                     for (Scanner scanner : configuration.getScanners()) {
                         try {
                             if (scanner.acceptsInput(path) || scanner.acceptsInput(fqn)) {
-                                classObject = scanner.scan(file, Optional.of(classObject));
+                                classObject = Optional.of(scanner.scan(file, classObject));
                             }
                         } catch (Exception e) {
                             if (log.isPresent()) {
                                 // SLF4J will filter out Throwables from the format string arguments.
-                                log.get().debug("could not scan file {} in url {} with scanner {}", file.getRelativePath(), url.toExternalForm(), scanner.getClass().getSimpleName(), e);
+                                log.get().error("could not scan file {} in url {} with scanner {}", file.getRelativePath(), url.toExternalForm(), scanner.getClass().getSimpleName(), e);
                             }
                         }
                     }
@@ -482,14 +482,15 @@ public class  Reflections {
                         return type != null && !type.isInterface();
                     }
                 }));
-                return concat(subTypes, store.getAll(index(SubTypesScanner.class), subTypes));
+                return ReflectionsIterables.concat(subTypes, store.getAll(index(SubTypesScanner.class), subTypes));
             } else {
                 return annotated;
             }
         } else {
-            Iterable<String> subTypes = concat(annotated, store.getAll(index(TypeAnnotationsScanner.class), annotated));
-            return concat(subTypes, store.getAll(index(SubTypesScanner.class), subTypes));
+            Iterable<String> subTypes = ReflectionsIterables.concat(annotated, store.getAll(index(TypeAnnotationsScanner.class), annotated));
+            return ReflectionsIterables.concat(subTypes, store.getAll(index(SubTypesScanner.class), subTypes));
         }
+
     }
 
     /**
@@ -609,7 +610,8 @@ public class  Reflections {
      */
     public List<String> getMethodParamNames(Method method) {
         Iterable<String> names = store.get(index(MethodParameterNamesScanner.class), name(method));
-        return !Iterables.isEmpty(names) ? Arrays.asList(Iterables.getOnlyElement(names).split(", ")) : Arrays.<String>asList();
+        return names != null && names.iterator().hasNext() ?
+                Arrays.asList(ReflectionsIterables.getOnlyElement(names).split(", ")) : Arrays.<String>asList();
     }
 
     /** get parameter names of given {@code constructor}
@@ -617,7 +619,7 @@ public class  Reflections {
      */
     public List<String> getConstructorParamNames(Constructor constructor) {
         Iterable<String> names = store.get(index(MethodParameterNamesScanner.class), Utils.name(constructor));
-        return !Iterables.isEmpty(names) ? Arrays.asList(Iterables.getOnlyElement(names).split(", ")) : Arrays.<String>asList();
+        return !ReflectionsIterables.isEmpty(names) ? Arrays.asList(ReflectionsIterables.getOnlyElement(names).split(", ")) : Arrays.<String>asList();
     }
 
     /** get all given {@code field} usages in methods and constructors
@@ -648,7 +650,7 @@ public class  Reflections {
      * @return Set of String, and not of Class, in order to avoid definition of all types in PermGen
      */
     public Set<String> getAllTypes() {
-        Set<String> allTypes = Sets.newHashSet(store.getAll(index(SubTypesScanner.class), Object.class.getName()));
+        Set<String> allTypes = ReflectionsIterables.makeSetOf(store.getAll(index(SubTypesScanner.class), Object.class.getName()));
         if (allTypes.isEmpty()) {
             throw new ReflectionsException("Couldn't find subtypes of Object. " +
                     "Make sure SubTypesScanner initialized to include Object class - new SubTypesScanner(false)");
@@ -688,5 +690,5 @@ public class  Reflections {
         return file;
     }
 
-    private ClassLoader[] loaders() { return configuration.getClassLoaders().get(); }
+    private Optional<ClassLoader[]> loaders() { return configuration.getClassLoaders(); }
 }

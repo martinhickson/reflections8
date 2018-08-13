@@ -54,6 +54,10 @@ public abstract class Utils {
     }
 
     public static Member getMemberFromDescriptor(String descriptor, ClassLoader... classLoaders) throws ReflectionsException {
+        return getMemberFromDescriptor(descriptor, Optional.of(classLoaders != null? classLoaders : new ClassLoader[]{}));
+    }
+
+    public static Member getMemberFromDescriptor(String descriptor, Optional<ClassLoader[]> classLoaders) throws ReflectionsException {
         int p0 = descriptor.lastIndexOf('(');
         String memberKey = p0 != -1 ? descriptor.substring(0, p0) : descriptor;
         String methodParameters = p0 != -1 ? descriptor.substring(p0 + 1, descriptor.lastIndexOf(')')) : "";
@@ -89,7 +93,7 @@ public abstract class Utils {
         throw new ReflectionsException("Can't resolve member named " + memberName + " for class " + className);
     }
 
-    public static Set<Method> getMethodsFromDescriptors(Iterable<String> annotatedWith, ClassLoader... classLoaders) {
+    public static Set<Method> getMethodsFromDescriptors(Iterable<String> annotatedWith, Optional<ClassLoader[]> classLoaders) {
         Set<Method> result = new HashSet();
         for (String annotated : annotatedWith) {
             if (!isConstructor(annotated)) {
@@ -98,9 +102,13 @@ public abstract class Utils {
             }
         }
         return result;
+
+    }
+    public static Set<Method> getMethodsFromDescriptors(Iterable<String> annotatedWith, ClassLoader... classLoaders) {
+        return getMethodsFromDescriptors(annotatedWith, Optional.of(classLoaders != null? classLoaders : new ClassLoader[]{}));
     }
 
-    public static Set<Constructor> getConstructorsFromDescriptors(Iterable<String> annotatedWith, ClassLoader... classLoaders) {
+    public static Set<Constructor> getConstructorsFromDescriptors(Iterable<String> annotatedWith, Optional<ClassLoader[]> classLoaders) {
         Set<Constructor> result = new HashSet();
         for (String annotated : annotatedWith) {
             if (isConstructor(annotated)) {
@@ -110,8 +118,11 @@ public abstract class Utils {
         }
         return result;
     }
+    public static Set<Constructor> getConstructorsFromDescriptors(Iterable<String> annotatedWith, ClassLoader... classLoaders) {
+        return getConstructorsFromDescriptors(annotatedWith, Optional.of(classLoaders != null? classLoaders : new ClassLoader[]{}));
+    }
 
-    public static Set<Member> getMembersFromDescriptors(Iterable<String> values, ClassLoader... classLoaders) {
+    public static Set<Member> getMembersFromDescriptors(Iterable<String> values, Optional<ClassLoader[]> classLoaders) {
         Set<Member> result = new HashSet();
         for (String value : values) {
             try {
@@ -123,7 +134,16 @@ public abstract class Utils {
         return result;
     }
 
+    public static Set<Member> getMembersFromDescriptors(Iterable<String> values, ClassLoader... classLoaders) {
+        return getMembersFromDescriptors(values, Optional.of(classLoaders != null? classLoaders : new ClassLoader[]{}));
+    }
+
     public static Field getFieldFromString(String field, ClassLoader... classLoaders) {
+        return getFieldFromString(field, Optional.of(classLoaders != null? classLoaders : new ClassLoader[]{}));
+    }
+
+
+    public static Field getFieldFromString(String field, Optional<ClassLoader[]> classLoaders) {
         String className = field.substring(0, field.lastIndexOf('.'));
         String fieldName = field.substring(field.lastIndexOf('.') + 1);
 

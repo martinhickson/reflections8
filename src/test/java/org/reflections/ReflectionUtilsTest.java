@@ -1,13 +1,11 @@
 package org.reflections;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Sets;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Test;
 import org.reflections.scanners.FieldAnnotationsScanner;
+import org.reflections.util.ReflectionsIterables;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -16,9 +14,10 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Function;
 
-import static com.google.common.collect.Collections2.transform;
 import static org.junit.Assert.*;
 import static org.reflections.ReflectionUtils.*;
 import static org.reflections.ReflectionsTest.are;
@@ -63,7 +62,7 @@ public class ReflectionUtilsTest {
         Class target = Collections.class;
         Object arg1 = Arrays.asList(1, 2, 3);
 
-        Set<Method> allMethods = Sets.newHashSet();
+        Set<Method> allMethods = new HashSet();
         for (Class<?> type : getAllSuperTypes(arg1.getClass())) {
             allMethods.addAll(getAllMethods(target, withModifier(Modifier.STATIC), withParameters(type)));
         }
@@ -86,7 +85,7 @@ public class ReflectionUtilsTest {
         Class target = Collections.class;
         Object arg1 = Arrays.asList(1, 2, 3);
 
-        Set<Method> allMethods = Sets.newHashSet();
+        Set<Method> allMethods = new HashSet();
         for (Class<?> type : getAllSuperTypes(arg1.getClass())) {
             allMethods.addAll(getAllMethods(target, withModifier(Modifier.STATIC), withParameters(type)));
         }
@@ -124,11 +123,11 @@ public class ReflectionUtilsTest {
     }
 
     private Set<String> names(Set<? extends Member> o) {
-        return Sets.newHashSet(transform(o, new Function<Member, String>() {
-            public String apply(@Nullable Member input) {
+        return ReflectionsIterables.transformToSet(o, new Function<Member, String>() {
+            public String apply(Member input) {
                 return input.getName();
             }
-        }));
+        });
     }
 
     private BaseMatcher<Set<? extends Member>> names(final String... namesArray) {

@@ -1,10 +1,5 @@
 package org.reflections;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -14,14 +9,18 @@ import org.reflections.scanners.*;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
+import org.reflections.util.ReflectionsIterables;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
@@ -234,13 +233,13 @@ public class ReflectionsTest {
                 new ArrayList());
 
         assertEquals(reflections.getMethodParamNames(C4.class.getDeclaredMethod("m4", String.class)),
-                Lists.newArrayList("string"));
+                Arrays.asList("string"));
 
         assertEquals(reflections.getMethodParamNames(C4.class.getDeclaredMethod("add", int.class, int.class)),
-                Lists.newArrayList("i1", "i2"));
+                Arrays.asList("i1", "i2"));
 
         assertEquals(reflections.getConstructorParamNames(C4.class.getDeclaredConstructor(String.class)),
-                Lists.newArrayList("f1"));
+                Arrays.asList("f1"));
     }
 
     @Test
@@ -282,7 +281,7 @@ public class ReflectionsTest {
     public static String getUserDir() {
         File file = new File(System.getProperty("user.dir"));
         //a hack to fix user.dir issue(?) in surfire
-        if (Lists.newArrayList(file.list()).contains("reflections")) {
+        if (Arrays.asList(file.list()).contains("reflections")) {
             file = new File(file, "reflections");
         }
         return file.getAbsolutePath();
@@ -316,7 +315,7 @@ public class ReflectionsTest {
         return new Match<Set<Class<?>>>() {
             public boolean matches(Object o) {
                 for (Class<?> c : (Iterable<Class<?>>) o) {
-                    if (!Iterables.contains(annotationTypes(Arrays.asList(c.getAnnotations())), annotation)) return false;
+                    if (!ReflectionsIterables.contains(annotationTypes(Arrays.asList(c.getAnnotations())), annotation)) return false;
                 }
                 return true;
             }
@@ -327,8 +326,9 @@ public class ReflectionsTest {
         return new Match<Set<Class<?>>>() {
             public boolean matches(Object o) {
                 for (Class<?> c : (Iterable<Class<?>>) o) {
-                    Set<Class> result = Sets.newHashSet();
-                    List<Class> stack = Lists.<Class>newArrayList(ReflectionUtils.getAllSuperTypes(c));
+                    Set<Class> result = new HashSet();
+                    List<Class> stack = new ArrayList<>();
+                    stack.addAll(ReflectionUtils.getAllSuperTypes(c));
                     while (!stack.isEmpty()) {
                         Class next = stack.remove(0);
                         if (result.add(next)) {
@@ -345,9 +345,8 @@ public class ReflectionsTest {
     }
 
     private Iterable<Class<? extends Annotation>> annotationTypes(Iterable<Annotation> annotations) {
-        return Iterables.transform(annotations, new Function<Annotation, Class<? extends Annotation>>() {
-            @Nullable
-            public Class<? extends Annotation> apply(@Nullable Annotation input) {
+        return ReflectionsIterables.transform(annotations, new Function<Annotation, Class<? extends Annotation>>() {
+            public Class<? extends Annotation> apply(Annotation input) {
                 return input != null ? input.annotationType() : null;
             }
         });

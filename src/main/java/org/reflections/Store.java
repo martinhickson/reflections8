@@ -30,7 +30,7 @@ public class Store {
 
     public Store(Configuration configuration) {
         storeMap = new HashMap<String, SetMultimap<String, String>>();
-        concurrent = configuration.getExecutorService() != null;
+        concurrent = configuration.getExecutorService().isPresent();
     }
 
     /** return all indices */
@@ -113,7 +113,7 @@ public class Store {
 
         public Iterator<T> iterator() {
             List<T> result = new ArrayList<>();
-            chain.forEach(iterable -> iterable.forEach(element -> result.add(element)));
+            chain.forEach(iterable -> { if (iterable != null) iterable.forEach(element -> result.add(element));});
             return result.iterator();
         }
 

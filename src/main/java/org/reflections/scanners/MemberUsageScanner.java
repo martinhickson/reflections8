@@ -93,7 +93,7 @@ public class MemberUsageScanner extends AbstractScanner {
                 classPool = new ClassPool();
                 Optional<ClassLoader[]> classLoaders = getConfiguration().getClassLoaders();
                 if (!classLoaders.isPresent()) {
-                    classLoaders = Optional.of(ClasspathHelper.classLoaders());
+                    classLoaders = ClasspathHelper.classLoaders();
                 }
                 for (ClassLoader classLoader : classLoaders.get()) {
                     classPool.appendClassPath(new LoaderClassPath(classLoader));

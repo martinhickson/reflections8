@@ -37,10 +37,10 @@ public class ConfigurationBuilder implements Configuration {
     private Set<Scanner> scanners;
     private Set<URL> urls;
     /*lazy*/ protected MetadataAdapter metadataAdapter;
-    private Optional<Predicate<String>> inputsFilter;
+    private Optional<Predicate<String>> inputsFilter = Optional.empty();
     /*lazy*/ private Serializer serializer;
-    private Optional<ExecutorService> executorService;
-    private Optional<ClassLoader[]> classLoaders;
+    private Optional<ExecutorService> executorService = Optional.empty();
+    private Optional<ClassLoader[]> classLoaders = Optional.empty();
     private boolean expandSuperTypes = true;
 
     public ConfigurationBuilder() {

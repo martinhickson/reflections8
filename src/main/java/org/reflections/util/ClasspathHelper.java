@@ -47,19 +47,27 @@ public abstract class ClasspathHelper {
      * 
      * @return the array of class loaders, not null
      */
-    public static ClassLoader[] classLoaders(ClassLoader... classLoaders) {
+    public static Optional<ClassLoader[]> classLoaders(ClassLoader... classLoaders) {
         if (classLoaders != null && classLoaders.length != 0) {
+            return Optional.of(classLoaders);
+        } else {
+            return classLoaders(Optional.empty());
+        }
+    }
+
+    public static Optional<ClassLoader[]> classLoaders(Optional<ClassLoader[]> classLoaders) {
+        if (classLoaders.isPresent()) {
             return classLoaders;
         } else {
             ClassLoader contextClassLoader = contextClassLoader(), staticClassLoader = staticClassLoader();
-            return contextClassLoader != null ?
+            return Optional.of(contextClassLoader != null ?
                     staticClassLoader != null && contextClassLoader != staticClassLoader ?
                             new ClassLoader[]{contextClassLoader, staticClassLoader} :
                             new ClassLoader[]{contextClassLoader} :
-                    new ClassLoader[] {};
-
+                    new ClassLoader[] {});
         }
     }
+
 
     /**
      * Returns a distinct collection of URLs based on a package name.
@@ -95,8 +103,8 @@ public abstract class ClasspathHelper {
      */
     public static Collection<URL> forResource(String resourceName, ClassLoader... classLoaders) {
         final List<URL> result = new ArrayList<URL>();
-        final ClassLoader[] loaders = classLoaders(classLoaders);
-        for (ClassLoader classLoader : loaders) {
+        final Optional<ClassLoader[]> loaders = classLoaders(classLoaders);
+        for (ClassLoader classLoader : loaders.get()) {
             try {
                 final Enumeration<URL> urls = classLoader.getResources(resourceName);
                 while (urls.hasMoreElements()) {
@@ -129,9 +137,9 @@ public abstract class ClasspathHelper {
      * @return the URL containing the class, null if not found
      */
     public static URL forClass(Class<?> aClass, ClassLoader... classLoaders) {
-        final ClassLoader[] loaders = classLoaders(classLoaders);
+        final Optional<ClassLoader[]> loaders = classLoaders(classLoaders);
         final String resourceName = aClass.getName().replace(".", "/") + ".class";
-        for (ClassLoader classLoader : loaders) {
+        for (ClassLoader classLoader : loaders.get()) {
             try {
                 final URL url = classLoader.getResource(resourceName);
                 if (url != null) {
@@ -158,7 +166,7 @@ public abstract class ClasspathHelper {
      * @return the collection of URLs, not null
      */
     public static Collection<URL> forClassLoader() {
-        return forClassLoader(classLoaders());
+        return forClassLoader(classLoaders().get());
     }
 
     /**
@@ -176,8 +184,8 @@ public abstract class ClasspathHelper {
      */
     public static Collection<URL> forClassLoader(ClassLoader... classLoaders) {
         final Collection<URL> result = new ArrayList<URL>();
-        final ClassLoader[] loaders = classLoaders(classLoaders);
-        for (ClassLoader classLoader : loaders) {
+        final Optional<ClassLoader[]> loaders = classLoaders(classLoaders);
+        for (ClassLoader classLoader : loaders.get()) {
             while (classLoader != null) {
                 if (classLoader instanceof URLClassLoader) {
                     URL[] urls = ((URLClassLoader) classLoader).getURLs();

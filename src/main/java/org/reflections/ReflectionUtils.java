@@ -353,11 +353,21 @@ public abstract class ReflectionUtils {
         };
     }
 
-    //
+    public static Class<?> forName(String typeName, ClassLoader ... classLoaders) {
+        if (classLoaders == null) {
+            return forName(typeName, Optional.empty());
+        } else {
+            return forName(typeName, Optional.of(classLoaders));
+        }
+
+    }
+
+
+        //
     /** tries to resolve a java type name to a Class
      * <p>if optional {@link ClassLoader}s are not specified, then both {@link org.reflections.util.ClasspathHelper#contextClassLoader()} and {@link org.reflections.util.ClasspathHelper#staticClassLoader()} are used
      * */
-    public static Class<?> forName(String typeName, ClassLoader... classLoaders) {
+    public static Class<?> forName(String typeName, Optional<ClassLoader[]> classLoaders) {
         if (getPrimitiveNames().contains(typeName)) {
             return getPrimitiveTypes().get(getPrimitiveNames().indexOf(typeName));
         } else {
@@ -379,7 +389,7 @@ public abstract class ReflectionUtils {
             }
 
             List<ReflectionsException> reflectionsExceptions = new ArrayList();
-            for (ClassLoader classLoader : ClasspathHelper.classLoaders(classLoaders)) {
+            for (ClassLoader classLoader : ClasspathHelper.classLoaders(classLoaders).get()) {
                 if (type.contains("[")) {
                     try { return Class.forName(type, false, classLoader); }
                     catch (Throwable e) {
@@ -403,8 +413,7 @@ public abstract class ReflectionUtils {
         }
     }
 
-    /** try to resolve all given string representation of types to a list of java types */
-    public static <T> List<Class<? extends T>> forNames(final Iterable<String> classes, ClassLoader... classLoaders) {
+    public static <T> List<Class<? extends T>> forNames(final Iterable<String> classes, Optional<ClassLoader[]> classLoaders) {
         List<Class<? extends T>> result = new ArrayList<Class<? extends T>>();
         for (String className : classes) {
             Class<?> type = forName(className, classLoaders);
@@ -413,6 +422,15 @@ public abstract class ReflectionUtils {
             }
         }
         return result;
+    }
+
+
+        /** try to resolve all given string representation of types to a list of java types */
+    public static <T> List<Class<? extends T>> forNames(final Iterable<String> classes, ClassLoader... classLoaders) {
+        if (classLoaders == null)
+            return forNames(classes, Optional.empty());
+        else
+            return forNames(classes, Optional.of(classLoaders));
     }
 
     private static Class[] parameterTypes(Member member) {
