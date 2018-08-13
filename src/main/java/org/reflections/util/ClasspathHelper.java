@@ -1,8 +1,5 @@
 package org.reflections.util;
 
-import org.reflections.Reflections;
-
-import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -10,10 +7,22 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+
+import javax.servlet.ServletContext;
+
+import org.reflections.Reflections;
 
 /**
  * Helper methods for working with the classpath.
@@ -299,16 +308,21 @@ public abstract class ClasspathHelper {
         try {
             final String part = cleanPath(url);
             File jarFile = new File(part);
-            JarFile myJar = new JarFile(part);
-            URL validUrl = tryToGetValidUrl(jarFile.getPath(), new File(part).getParent(), part);
-            if (validUrl != null) { result.add(validUrl); }
-            final Manifest manifest = myJar.getManifest();
-            if (manifest != null) {
-                final String classPath = manifest.getMainAttributes().getValue(new Attributes.Name("Class-Path"));
-                if (classPath != null) {
-                    for (String jar : classPath.split(" ")) {
-                        validUrl = tryToGetValidUrl(jarFile.getPath(), new File(part).getParent(), jar);
-                        if (validUrl != null) { result.add(validUrl); }
+            try (JarFile myJar = new JarFile(part)) {
+                URL validUrl = tryToGetValidUrl(jarFile.getPath(), new File(part).getParent(), part);
+                if(validUrl != null) {
+                    result.add(validUrl);
+                }
+                final Manifest manifest = myJar.getManifest();
+                if(manifest != null) {
+                    final String classPath = manifest.getMainAttributes().getValue(new Attributes.Name("Class-Path"));
+                    if(classPath != null) {
+                        for (String jar : classPath.split(" ")) {
+                            validUrl = tryToGetValidUrl(jarFile.getPath(), new File(part).getParent(), jar);
+                            if(validUrl != null) {
+                                result.add(validUrl);
+                            }
+                        }
                     }
                 }
             }

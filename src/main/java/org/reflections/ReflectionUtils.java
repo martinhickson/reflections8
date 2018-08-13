@@ -1,18 +1,29 @@
 package org.reflections;
 
-import org.reflections.util.AlwaysTruePredicate;
-import org.reflections.util.ClasspathHelper;
+import static org.reflections.util.Utils.isEmpty;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.reflections.util.Utils.isEmpty;
+import org.reflections.util.AlwaysTruePredicate;
+import org.reflections.util.ClasspathHelper;
 
 /** convenient java reflection helper methods
  * <p>
@@ -444,7 +455,9 @@ public abstract class ReflectionUtils {
         Annotation[][] annotations =
                 member instanceof Method ? ((Method) member).getParameterAnnotations() :
                 member instanceof Constructor ? ((Constructor) member).getParameterAnnotations() : null;
-        for (Annotation[] annotation : annotations) Collections.addAll(result, annotation);
+        if (annotations != null) {
+            for (Annotation[] annotation : annotations) Collections.addAll(result, annotation);
+        }
         return result;
     }
 

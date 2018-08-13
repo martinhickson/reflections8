@@ -14,8 +14,8 @@ public class SynchronizedHashSetMultimap<K, V> extends HashSetMultimap<K, V> imp
 
     private static final long serialVersionUID = -907195260984577390L;
 
-    Object mutex;
-    SetMultimap delegate;
+    private final Object mutex;
+    private final SetMultimap delegate;
 
     public SynchronizedHashSetMultimap(final SetMultimap delegate) {
         this.delegate = delegate;

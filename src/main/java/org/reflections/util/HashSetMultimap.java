@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 
 public class HashSetMultimap<T,V> extends HashMap<T, Set<V>> implements SetMultimap<T, V> {
     private static final long serialVersionUID = 140511307437539771L;
-    private final Supplier<Set<V>> setSupplier;
+    private transient final Supplier<Set<V>> setSupplier;
 
     public HashSetMultimap() {
         setSupplier = () -> new HashSet<>();
