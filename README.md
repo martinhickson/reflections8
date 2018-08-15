@@ -7,10 +7,9 @@ This fork is changed to use java8 instead of guava.
     <version>0.10.5</version>
 </dependency>
 ```
+[![Build Status](https://travis-ci.org/aschoerk/reflections8.svg?branch=master)](https://travis-ci.org/aschoerk/reflections8)
 
 
-
-[#movingtogitlab](https://twitter.com/movingtogitlab) because Microsoft is acquiring GitHub.
 
 ----
 
