@@ -1,3 +1,15 @@
+This fork is changed to use java8 instead of guava. 
+
+```xml
+<dependency>
+    <groupId>net.oneandone.reflections8</groupId>
+    <artifactId>reflections8</artifactId>
+    <version>0.10.5</version>
+</dependency>
+```
+
+
+
 [#movingtogitlab](https://twitter.com/movingtogitlab) because Microsoft is acquiring GitHub.
 
 ----
