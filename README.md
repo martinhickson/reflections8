@@ -122,7 +122,7 @@ ReflectionsUtils contains some convenient Java reflection helper methods for get
 for example:
 
 ```java
-import static org.reflections.ReflectionUtils.*;
+import static org.reflections8.ReflectionUtils.*;
 
 Set<Method> getters = getAllMethods(someClass,
   withModifier(Modifier.PUBLIC), withPrefix("get"), withParametersCount(0));
