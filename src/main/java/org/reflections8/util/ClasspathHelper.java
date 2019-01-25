@@ -205,6 +205,22 @@ public abstract class ClasspathHelper {
                 classLoader = classLoader.getParent();
             }
         }
+        if (result.isEmpty()) {
+            // No result found using ClassLoaders, probably because java 9+ changed those.
+            // Instead, parse the classpath directly.
+            String[] classPathEntries = System
+                    .getProperty("java.class.path")
+                    .split(File.pathSeparator);
+            for (String entry : classPathEntries) {
+                try {
+                    result.add(new URL("file://" + entry));
+                } catch (MalformedURLException ex) {
+                    if (Reflections.log.isPresent()) {
+                        Reflections.log.get().warn("Could not convert "+entry+" to url.", ex);
+                    }
+                }
+            }
+        }
         return distinctUrls(result);
     }
 
