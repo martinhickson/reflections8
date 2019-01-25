@@ -61,6 +61,28 @@ public class VfsTest {
         }
 
         {
+            URL rtJarUrl = ClasspathHelper.forClass(String.class);
+            assertTrue(rtJarUrl.toString().startsWith("jar:file:"));
+            assertTrue(rtJarUrl.toString().contains(".jar!"));
+
+            assertFalse(Vfs.DefaultUrlTypes.jarFile.matches(rtJarUrl));
+            assertTrue(Vfs.DefaultUrlTypes.jarUrl.matches(rtJarUrl));
+            assertFalse(Vfs.DefaultUrlTypes.directory.matches(rtJarUrl));
+
+            Vfs.Dir dir = Vfs.DefaultUrlTypes.jarUrl.createDir(rtJarUrl);
+            Vfs.File file = null;
+            for (Vfs.File f : dir.getFiles()) {
+                if (f.getRelativePath().equals("java/lang/String.class")) {
+                    file = f;
+                    break;
+                }
+            }
+
+            ClassFile stringCF = mdAdapter.getOrCreateClassObject(file);
+            String className = mdAdapter.getClassName(stringCF);
+            assertTrue(className.equals("java.lang.String"));
+        }
+        {
             URL rtJarUrl = ClasspathHelper.forClass(Logger.class);
             assertTrue(rtJarUrl.toString().startsWith("jar:file:"));
             assertTrue(rtJarUrl.toString().contains(".jar!"));
@@ -72,7 +94,6 @@ public class VfsTest {
             Vfs.Dir dir = Vfs.DefaultUrlTypes.jarUrl.createDir(rtJarUrl);
             Vfs.File file = null;
             for (Vfs.File f : dir.getFiles()) {
-                System.out.println(f.getRelativePath());
                 if (f.getRelativePath().equals("org/slf4j/Logger.class")) {
                     file = f;
                     break;
