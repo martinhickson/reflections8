@@ -28,6 +28,7 @@ import org.reflections8.vfs.Vfs;
 import org.reflections8.vfs.ZipDir;
 
 import javassist.bytecode.ClassFile;
+import org.slf4j.Logger;
 
 /** */
 public class VfsTest {
@@ -60,7 +61,7 @@ public class VfsTest {
         }
 
         {
-            URL rtJarUrl = ClasspathHelper.forClass(String.class);
+            URL rtJarUrl = ClasspathHelper.forClass(Logger.class);
             assertTrue(rtJarUrl.toString().startsWith("jar:file:"));
             assertTrue(rtJarUrl.toString().contains(".jar!"));
 
@@ -71,7 +72,8 @@ public class VfsTest {
             Vfs.Dir dir = Vfs.DefaultUrlTypes.jarUrl.createDir(rtJarUrl);
             Vfs.File file = null;
             for (Vfs.File f : dir.getFiles()) {
-                if (f.getRelativePath().equals("java/lang/String.class")) {
+                System.out.println(f.getRelativePath());
+                if (f.getRelativePath().equals("org/slf4j/Logger.class")) {
                     file = f;
                     break;
                 }
@@ -79,7 +81,7 @@ public class VfsTest {
 
             ClassFile stringCF = mdAdapter.getOrCreateClassObject(file);
             String className = mdAdapter.getClassName(stringCF);
-            assertTrue(className.equals("java.lang.String"));
+            assertTrue(className.equals("org.slf4j.Logger"));
         }
 
         {
@@ -158,7 +160,7 @@ public class VfsTest {
 
     @Test
     public void vfsFromDirWithinAJarUrl() throws MalformedURLException {
-        URL directoryInJarUrl = ClasspathHelper.forClass(String.class);
+        URL directoryInJarUrl = ClasspathHelper.forClass(Logger.class);
         assertTrue(directoryInJarUrl.toString().startsWith("jar:file:"));
         assertTrue(directoryInJarUrl.toString().contains(".jar!"));
 
