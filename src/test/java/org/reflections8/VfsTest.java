@@ -20,6 +20,8 @@ import java.util.stream.StreamSupport;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 import org.reflections8.adapters.JavassistAdapter;
 import org.reflections8.util.ClasspathHelper;
 import org.reflections8.vfs.JarInputDir;
@@ -31,6 +33,7 @@ import javassist.bytecode.ClassFile;
 import org.slf4j.Logger;
 
 /** */
+@RunWith(JUnit4.class)
 public class VfsTest {
 
     @Test
@@ -59,29 +62,32 @@ public class VfsTest {
             //noinspection UnusedDeclaration
             String className = mdAdapter.getClassName(stringCF);
         }
+        // TODO:
+        // That won't work any more because of the modules system:
+        // https://docs.oracle.com/en/java/javase/11/docs/api/java.base/module-summary.html
 
-        {
-            URL rtJarUrl = ClasspathHelper.forClass(String.class);
-            assertTrue(rtJarUrl.toString().startsWith("jar:file:"));
-            assertTrue(rtJarUrl.toString().contains(".jar!"));
-
-            assertFalse(Vfs.DefaultUrlTypes.jarFile.matches(rtJarUrl));
-            assertTrue(Vfs.DefaultUrlTypes.jarUrl.matches(rtJarUrl));
-            assertFalse(Vfs.DefaultUrlTypes.directory.matches(rtJarUrl));
-
-            Vfs.Dir dir = Vfs.DefaultUrlTypes.jarUrl.createDir(rtJarUrl);
-            Vfs.File file = null;
-            for (Vfs.File f : dir.getFiles()) {
-                if (f.getRelativePath().equals("java/lang/String.class")) {
-                    file = f;
-                    break;
-                }
-            }
-
-            ClassFile stringCF = mdAdapter.getOrCreateClassObject(file);
-            String className = mdAdapter.getClassName(stringCF);
-            assertTrue(className.equals("java.lang.String"));
-        }
+//        {
+//            URL rtJarUrl = ClasspathHelper.forClass(String.class);
+//            assertTrue(rtJarUrl.toString().startsWith("jrt:/java.base/"));
+//            assertTrue(rtJarUrl.toString().contains(".jar!"));
+//
+//            assertFalse(Vfs.DefaultUrlTypes.jarFile.matches(rtJarUrl));
+//            assertTrue(Vfs.DefaultUrlTypes.jarUrl.matches(rtJarUrl));
+//            assertFalse(Vfs.DefaultUrlTypes.directory.matches(rtJarUrl));
+//
+//            Vfs.Dir dir = Vfs.DefaultUrlTypes.jarUrl.createDir(rtJarUrl);
+//            Vfs.File file = null;
+//            for (Vfs.File f : dir.getFiles()) {
+//                if (f.getRelativePath().equals("java/lang/String.class")) {
+//                    file = f;
+//                    break;
+//                }
+//            }
+//
+//            ClassFile stringCF = mdAdapter.getOrCreateClassObject(file);
+//            String className = mdAdapter.getClassName(stringCF);
+//            assertTrue(className.equals("java.lang.String"));
+//        }
         {
             URL rtJarUrl = ClasspathHelper.forClass(Logger.class);
             assertTrue(rtJarUrl.toString().startsWith("jar:file:"));
