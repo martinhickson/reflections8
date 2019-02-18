@@ -3,7 +3,7 @@
 
     <groupId>net.oneandone.reflections8</groupId>
     <artifactId>reflections8</artifactId>
-    <version>0.11.3-SNAPSHOT</version>
+    <version>0.11.3</version>
 
     <name>Reflections8</name>
     <description>Reflections8 - a Java runtime metadata analysis without guava on Java 8</description>
@@ -24,7 +24,7 @@
         <url>https://github.com/aschoerk/reflections8</url>
         <connection>scm:git:ssh://git@github.com/aschoerk/reflections8.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/aschoerk/reflections8.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v0.11.3</tag>
     </scm>
 
 
