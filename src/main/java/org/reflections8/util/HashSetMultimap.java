@@ -39,6 +39,29 @@ public class HashSetMultimap<T,V> extends HashMap<T, Set<V>> implements SetMulti
     }
 
     @Override
+    public void putAllSingles(SetMultimap<T,V> m) {
+        for (T key: m.keySet()) {
+            Set<V> val = m.get(key);
+            Set<V> vs = super.get(key);
+            if(vs != null) {
+                if (val != null) {
+                    vs.addAll(val);
+                }
+            }
+            else {
+                if (val == null) {
+                    super.put(key, null);
+                } else {
+                    Set<V> setValue = setSupplier.get();
+                    if(val != null)
+                        setValue.addAll(m.get(key));
+                    super.put(key, setValue);
+                }
+            }
+        }
+    }
+
+    @Override
     public boolean removeSingle(Object key, V value) {
         Set<V> vs = super.get(key);
         if (vs == null)

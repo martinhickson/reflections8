@@ -31,6 +31,14 @@ public class SynchronizedHashSetMultimap<K, V> extends HashSetMultimap<K, V> imp
         }
     }
 
+
+    @Override
+    public void putAllSingles(final SetMultimap<K,V> m) {
+        synchronized (mutex) {
+            delegate.putAllSingles(m);
+        }
+    }
+
     public boolean removeSingle(final Object key, final Object value) {
         synchronized (mutex) {
             return delegate.removeSingle(key, value);
@@ -111,6 +119,7 @@ public class SynchronizedHashSetMultimap<K, V> extends HashSetMultimap<K, V> imp
             delegate.putAll(m);
         }
     }
+
 
 
     @Override

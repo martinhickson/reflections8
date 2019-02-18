@@ -423,7 +423,7 @@ public class  Reflections {
                     expandSupertypes(expand, key, type);
                 }
             }
-            mmap.putAll(expand);
+            mmap.putAllSingles(expand);
         }
     }
 

@@ -1,4 +1,4 @@
-//generated using Reflections JavaCodeSerializer [Tue Aug 21 17:05:18 CEST 2018]
+//generated using Reflections JavaCodeSerializer [Mon Feb 18 19:30:50 CET 2019]
 package org.reflections8;
 
 public interface MyTestModelStore {

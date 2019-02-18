@@ -12,6 +12,8 @@ import java.util.Set;
 public interface SetMultimap<T, V> extends Map<T, Set<V>> {
     boolean putSingle(T key, V value);
 
+    void putAllSingles(SetMultimap<T,V> m);
+
     boolean removeSingle(Object key, V value);
 
     Collection<V> flatValues();
