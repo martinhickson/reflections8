@@ -7,6 +7,8 @@ This fork is changed to use java8 instead of guava.
     <version>0.10.5</version>
 </dependency>
 ```
+
+To avoid mixup of classes between "pre java8"-reflections and reflections8 all is moved from org.reflections to org.reflections8
 [![Build Status](https://travis-ci.org/aschoerk/reflections8.svg?branch=master)](https://travis-ci.org/aschoerk/reflections8)
 
 
