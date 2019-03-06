@@ -55,7 +55,10 @@ import org.reflections8.util.Utils;
  */
 public abstract class Vfs {
 
-    private static List<UrlType> defaultUrlTypes = Arrays.asList(DefaultUrlTypes.values());
+    private static List<UrlType> defaultUrlTypes = new ArrayList<>();
+    static {
+      defaultUrlTypes.addAll(Arrays.asList(DefaultUrlTypes.values()));
+    }
 
     /** an abstract vfs dir */
     public interface Dir {
