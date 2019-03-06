@@ -267,7 +267,7 @@ public class  Reflections {
                 }
             }
 
-            log.get().info(format("Reflections took %d ms to scan %d urls, producing %d keys and %d values %s",
+            log.get().trace(format("Reflections took %d ms to scan %d urls, producing %d keys and %d values %s",
                     time, scannedUrls, keys, values,
                     executorService.isPresent() && executorService.get() instanceof ThreadPoolExecutor ?
                             format("[using %d cores]", ((ThreadPoolExecutor) executorService.get()).getMaximumPoolSize()) : ""));
