@@ -4,7 +4,7 @@ This fork is changed to use java8 instead of guava.
 <dependency>
     <groupId>net.oneandone.reflections8</groupId>
     <artifactId>reflections8</artifactId>
-    <version>0.10.5</version>
+    <version>0.11.4</version>
 </dependency>
 ```
 
@@ -31,9 +31,9 @@ Using Reflections you can query your metadata such as:
 Add Reflections to your project. for maven projects just add this dependency:
 ```xml
 <dependency>
-    <groupId>org.reflections</groupId>
-    <artifactId>reflections</artifactId>
-    <version>0.9.11</version>
+    <groupId>net.oneandone.reflections8</groupId>
+    <artifactId>reflections8</artifactId>
+    <version>0.11.4</version>
 </dependency>
 ```
 
