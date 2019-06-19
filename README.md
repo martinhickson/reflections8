@@ -1,4 +1,5 @@
 This fork is changed to use java8 instead of guava. 
+@github/baelec perhaps we can merge our efforts as I see that you went a similar path with your fork
 
 ```xml
 <dependency>
