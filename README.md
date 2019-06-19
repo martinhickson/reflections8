@@ -1,9 +1,5 @@
 This fork is changed to use java8 instead of guava. 
 
-@aschoerk/reflections8 check mentioning
-
-@baelec/reflections perhaps we can merge our efforts as I see that you went a similar path with your fork
-
 ```xml
 <dependency>
     <groupId>net.oneandone.reflections8</groupId>
