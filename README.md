@@ -4,7 +4,7 @@ This fork is changed to use java8 instead of guava.
 <dependency>
     <groupId>net.oneandone.reflections8</groupId>
     <artifactId>reflections8</artifactId>
-    <version>0.11.4</version>
+    <version>0.11.5</version>
 </dependency>
 ```
 
@@ -33,7 +33,7 @@ Add Reflections to your project. for maven projects just add this dependency:
 <dependency>
     <groupId>net.oneandone.reflections8</groupId>
     <artifactId>reflections8</artifactId>
-    <version>0.11.4</version>
+    <version>0.11.5</version>
 </dependency>
 ```
 
