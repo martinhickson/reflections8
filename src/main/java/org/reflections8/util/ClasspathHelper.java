@@ -213,7 +213,7 @@ public abstract class ClasspathHelper {
                     .split(File.pathSeparator);
             for (String entry : classPathEntries) {
                 try {
-                    result.add(new URL("file://" + new File(entry).getAbsolutePath()));
+                    result.add(new File(entry).toURI().toURL());
                 } catch (MalformedURLException ex) {
                     if (Reflections.log.isPresent()) {
                         Reflections.log.get().warn("Could not convert "+entry+" to url.", ex);
