@@ -48,7 +48,7 @@ import org.reflections8.util.Utils;
  *          }
  *      });
  *
- *      Vfs.Dir dir = Vfs.fromURL(new URL("http://mirrors.ibiblio.org/pub/mirrors/maven2/org/slf4j/slf4j-api/1.5.6/slf4j-api-1.5.6.jar"));
+ *      Vfs.Dir dir = Vfs.fromURL(new URL("http://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.5.6/slf4j-api-1.5.6.jar"));
  * </pre>
  * <p>use {@link org.reflections8.vfs.Vfs#findFiles(java.util.Collection, java.util.function.Predicate)} to get an
  * iteration of files matching given name predicate over given list of urls
