@@ -343,10 +343,10 @@ public class ConfigurationBuilder implements Configuration {
             ClassLoader[] existing = this.classLoaders.get();
             int existingLength = existing.length;
             ClassLoader[] tmpArray = Arrays.copyOf(existing, existingLength + classLoaders.length);
-            for (int i = 0; i < classLoaders.length; i++) {
-                tmpArray[i + existingLength] = classLoaders[i];
-            }
+            System.arraycopy(classLoaders, 0, tmpArray, existingLength, classLoaders.length);
             this.classLoaders = Optional.of(tmpArray);
+        } else {
+            this.classLoaders = Optional.of(classLoaders);
         }
         return this;
     }
