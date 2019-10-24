@@ -1,4 +1,4 @@
-//generated using Reflections JavaCodeSerializer [Thu Mar 14 08:45:41 CET 2019]
+//generated using Reflections JavaCodeSerializer [Thu Oct 24 14:38:48 CEST 2019]
 package org.reflections8;
 
 public interface MyTestModelStore {
@@ -97,6 +97,12 @@ public interface MyTestModelStore {
 			public interface TestModel$C7 {
 				public interface annotations {
 					public interface org_reflections8_TestModel$AC3 {}
+				}
+			}
+			public interface TestModel$C8 {
+				public interface methods {
+					public interface lambda$print$0 {}
+					public interface print {}
 				}
 			}
 			public interface TestModel$I1 {

@@ -191,7 +191,7 @@ public class VfsTest {
         assertTrue(directoryInJarUrl.toString().contains(".jar!"));
 
         String directoryInJarPath = directoryInJarUrl.toExternalForm().replaceFirst("jar:", "");
-        int start = directoryInJarPath.indexOf(":") + 2;
+        int start = directoryInJarPath.indexOf(":") + (File.separator.equals("/") ? 1 : 2);
         int end = directoryInJarPath.indexOf(".jar!") + 4;
         String expectedJarFile = directoryInJarPath.substring(start, end);
 

@@ -95,11 +95,6 @@ public interface TestModel {
         public int add(int i1, int i2) {
             return i1 + i2;
         }
-
-        public void print(String s) {
-            Runnable run = () -> {
-            };
-        }
     }
 
     public class C5 extends C3 {
@@ -146,6 +141,13 @@ public interface TestModel {
                 c1.method();
                 c1.method("");
             }
+        }
+    }
+
+    public class C8 {
+        public void print() {
+            Runnable run = () -> {
+            };
         }
     }
 }
