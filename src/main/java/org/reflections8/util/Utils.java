@@ -74,8 +74,8 @@ public abstract class Utils {
 
         int p1 = Math.max(memberKey.lastIndexOf('.'), memberKey.lastIndexOf('$'));
         String className = memberKey.substring(memberKey.lastIndexOf(' ') + 1, p1);
-        int endsWithLambda = memberKey.lastIndexOf(".lambda");
-        if (endsWithLambda > -1) {
+        int endsWithLambda = className.lastIndexOf(".lambda");
+        if (endsWithLambda > 0) {
             className = className.substring(0, endsWithLambda);
         }
         String memberName = memberKey.substring(p1 + 1);
