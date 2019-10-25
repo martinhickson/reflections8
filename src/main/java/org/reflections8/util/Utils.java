@@ -1,6 +1,6 @@
 package org.reflections8.util;
 
-import static java.util.Optional.of;
+import static java.util.Optional.of;          
 import static org.reflections8.ReflectionUtils.forName;
 
 import java.io.File;
