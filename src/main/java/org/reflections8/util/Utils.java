@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.reflections8.Reflections;
 import org.reflections8.ReflectionsException;
@@ -68,27 +69,35 @@ public abstract class Utils {
     }
 
     public static Member getMemberFromDescriptor(String descriptor, Optional<ClassLoader[]> classLoaders) {
+        System.out.println("---------------------------------------------------------------------------");
+        System.out.println("Descriptor: " + descriptor);
         int p0 = descriptor.lastIndexOf('(');
         String memberKey = p0 != -1 ? descriptor.substring(0, p0) : descriptor;
+        System.out.println("memberKey:" + memberKey);
         String methodParameters = p0 != -1 ? descriptor.substring(p0 + 1, descriptor.lastIndexOf(')')) : "";
 
         int p1 = Math.max(memberKey.lastIndexOf('.'), memberKey.lastIndexOf('$'));
         String className = memberKey.substring(memberKey.lastIndexOf(' ') + 1, p1);
-        int endsWithLambda = className.lastIndexOf(".lambda");
-        if (endsWithLambda > 0) {
-            className = className.substring(0, endsWithLambda);
-        }
+        System.out.println("className:" + className);
         String memberName = memberKey.substring(p1 + 1);
+        System.out.println("memberName:" + memberName);
+        int endsWithLambda = memberKey.lastIndexOf(".lambda");
+        if (endsWithLambda > 0) {
+            memberName = memberKey.substring(endsWithLambda + 7);
+            className = memberKey.substring(memberKey.lastIndexOf(' ') + 1, endsWithLambda);
+        }
 
         Class<?>[] parameterTypes = getParameterTypes(classLoaders, methodParameters);
-
+        System.out.println("Classname: " + className);
         Class<?> aClass = forName(className, classLoaders);
-        return getMemberMethod(descriptor, className, endsWithLambda, memberName, parameterTypes, aClass);
+        System.out.println("Class: " + aClass.toString());
+        return getMember(descriptor, className, endsWithLambda, memberName, parameterTypes, aClass);
     }
 
-    private static Member getMemberMethod(String descriptor, String className, int endsWithLambda, String memberName,
+    private static Member getMember(String descriptor, String className, int endsWithLambda, String memberName,
             Class<?>[] parameterTypes, Class<?> aClass) {
         while (aClass != null) {
+            System.out.println("aClass: " + aClass);
             try {
                 if (!descriptor.contains("(")) {
                     return aClass.isInterface() ? aClass.getField(memberName) : aClass.getDeclaredField(memberName);
@@ -99,11 +108,16 @@ public abstract class Utils {
                     return aClass.isInterface() ? aClass.getMethod(memberName, parameterTypes)
                             : aClass.getDeclaredMethod(memberName, parameterTypes);
                 } else {
-                    memberName = new StringBuilder("lambda$").append(memberName).toString();
+                    System.out.println("MemberName 1:" + memberName);
+                    memberName = new StringBuilder("lambda").append(memberName).toString();
+                    System.out.println("............................");
+                    Stream.of(aClass.getDeclaredMethods()).forEach(System.out::println);
+                    System.out.println("............................");
                     return aClass.isInterface() ? aClass.getMethod(memberName, parameterTypes)
                             : aClass.getDeclaredMethod(memberName, parameterTypes);
                 }
             } catch (Exception e) {
+                System.out.println("Exception:" + e.getMessage());
                 aClass = aClass.getSuperclass();
             }
         }
