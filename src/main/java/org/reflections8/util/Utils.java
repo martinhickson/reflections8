@@ -63,26 +63,40 @@ public abstract class Utils {
         return getMemberFromDescriptor(descriptor, Optional.of(classLoaders != null? classLoaders : new ClassLoader[]{}));
     }
 
-    public static Member getMemberFromDescriptor(String descriptor, Optional<ClassLoader[]> classLoaders) throws ReflectionsException {
+    public static Member getMemberFromDescriptor(String descriptor, Optional<ClassLoader[]> classLoaders) {
         int p0 = descriptor.lastIndexOf('(');
         String memberKey = p0 != -1 ? descriptor.substring(0, p0) : descriptor;
         String methodParameters = p0 != -1 ? descriptor.substring(p0 + 1, descriptor.lastIndexOf(')')) : "";
 
-        int p1 = Math.max(memberKey.lastIndexOf('.'), memberKey.lastIndexOf("$"));
+        int p1 = Math.max(memberKey.lastIndexOf('.'), memberKey.lastIndexOf('$'));
         String className = memberKey.substring(memberKey.lastIndexOf(' ') + 1, p1);
         String memberName = memberKey.substring(p1 + 1);
+        int endsWithLambda = memberKey.lastIndexOf(".lambda");
+        if (endsWithLambda > 0) {
+            memberName = memberKey.substring(endsWithLambda + 1);
+            className = memberKey.substring(memberKey.lastIndexOf(' ') + 1, endsWithLambda);
+        }
 
+        Class<?>[] parameterTypes = getParameterTypes(classLoaders, methodParameters);
+        Class<?> aClass = forName(className, classLoaders);
+        return getMember(descriptor, className, memberName, parameterTypes, aClass);
+    }
+
+    private static Class<?>[] getParameterTypes(Optional<ClassLoader[]> classLoaders, String methodParameters) {
         Class<?>[] parameterTypes = null;
         if (!isEmpty(methodParameters)) {
             String[] parameterNames = methodParameters.split(",");
-            List<Class<?>> result = new ArrayList<Class<?>>(parameterNames.length);
+            List<Class<?>> result = new ArrayList<>(parameterNames.length);
             for (String name : parameterNames) {
                 result.add(forName(name.trim(), classLoaders));
             }
             parameterTypes = result.toArray(new Class<?>[result.size()]);
         }
+        return parameterTypes;
+    }
 
-        Class<?> aClass = forName(className, classLoaders);
+    private static Member getMember(String descriptor, String className, String memberName, Class<?>[] parameterTypes,
+            Class<?> aClass) {
         while (aClass != null) {
             try {
                 if (!descriptor.contains("(")) {
@@ -110,13 +124,12 @@ public abstract class Utils {
         return result;
 
     }
-
-  public static Set<Method> getMethodsFromDescriptors(Iterable<String> annotatedWith, ClassLoader... classLoaders) {
+    
+    public static Set<Method> getMethodsFromDescriptors(Iterable<String> annotatedWith, ClassLoader... classLoaders) {
         return getMethodsFromDescriptors(annotatedWith, Optional.of(classLoaders != null? classLoaders : new ClassLoader[]{}));
     }
 
     public static Set<Constructor> getConstructorsFromDescriptors(Iterable<String> annotatedWith, Optional<ClassLoader[]> classLoaders) {
-
         Set<Constructor> result = new HashSet<>();
         for (String annotated : annotatedWith) {
             if (isConstructor(annotated)) {
@@ -131,7 +144,7 @@ public abstract class Utils {
     }
 
     public static Set<Member> getMembersFromDescriptors(Iterable<String> values, Optional<ClassLoader[]> classLoaders) {
-        Set<Member> result = new HashSet();
+        Set<Member> result = new HashSet<>();
         for (String value : values) {
             try {
                 result.add(Utils.getMemberFromDescriptor(value, classLoaders));
@@ -149,7 +162,6 @@ public abstract class Utils {
     public static Field getFieldFromString(String field, ClassLoader... classLoaders) {
         return getFieldFromString(field, Optional.of(classLoaders != null? classLoaders : new ClassLoader[]{}));
     }
-
 
     public static Field getFieldFromString(String field, Optional<ClassLoader[]> classLoaders) {
         String className = field.substring(0, field.lastIndexOf('.'));
