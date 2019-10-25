@@ -99,12 +99,6 @@ public interface MyTestModelStore {
 					public interface org_reflections8_TestModel$AC3 {}
 				}
 			}
-			public interface TestModel$C8 {
-				public interface methods {
-					public interface lambda$print$0 {}
-					public interface print {}
-				}
-			}
 			public interface TestModel$I1 {
 				public interface annotations {
 					public interface org_reflections8_TestModel$AI1 {}

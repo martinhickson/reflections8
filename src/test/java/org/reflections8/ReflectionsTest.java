@@ -190,8 +190,7 @@ public class ReflectionsTest {
             assertThat(reflections8.getMethodsMatchParams(),
                     are(C4.class.getDeclaredMethod("m1"), C4.class.getDeclaredMethod("m3"),
                             AC2.class.getMethod("value"), AF1.class.getMethod("value"), AM1.class.getMethod("value"),
-                            Usage.C1.class.getDeclaredMethod("method"), Usage.C2.class.getDeclaredMethod("method"),
-                            C8.class.getDeclaredMethod("print"), C8.class.getDeclaredMethod("lambda$print$0")));
+                            Usage.C1.class.getDeclaredMethod("method"), Usage.C2.class.getDeclaredMethod("method")));
 
             assertThat(reflections8.getMethodsMatchParams(int[][].class, String[][].class),
                     are(C4.class.getDeclaredMethod("m1", int[][].class, String[][].class)));
@@ -233,6 +232,7 @@ public class ReflectionsTest {
                         C4.class.getDeclaredConstructor(), C5.class.getDeclaredConstructor(), C6.class.getDeclaredConstructor(),
                         C7.class.getDeclaredConstructor(), Usage.C1.class.getDeclaredConstructor(), Usage.C2.class.getDeclaredConstructor(),
                         C8.class.getDeclaredConstructor()));
+
 
         assertThat(reflections8.getConstructorsWithAnyParamAnnotated(AM1.class),
                 are(C4.class.getDeclaredConstructor(String.class)));
