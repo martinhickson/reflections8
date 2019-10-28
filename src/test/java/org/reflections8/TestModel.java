@@ -73,5 +73,8 @@ public interface TestModel {
                 c1.method("");
             }
         }
+    }    
+    public class C8 {
+        public void print() {Runnable run = () -> {};}
     }
 }
