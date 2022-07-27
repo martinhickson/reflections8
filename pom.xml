@@ -116,7 +116,13 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jboss-vfs</artifactId>
+            <version>3.2.17.Final</version>
+            <scope>provided</scope>
+            <optional>true</optional><!-- case: when using jboss-vfs -->
+        </dependency>
     </dependencies>
 
     <profiles>
