@@ -1,5 +1,10 @@
 package org.reflections8.vfs;
 
+import org.reflections8.Reflections;
+import org.reflections8.ReflectionsException;
+import org.reflections8.vfs.Vfs.Dir;
+import org.reflections8.vfs.Vfs.UrlType;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -9,17 +14,11 @@ import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.reflections8.Reflections;
-import org.reflections8.ReflectionsException;
-import org.reflections8.vfs.Vfs.Dir;
-import org.reflections8.vfs.Vfs.UrlType;
-
-
 /**
  * UrlType to be used by Reflections library.
  * This class handles the vfszip and vfsfile protocol of JBOSS files.
  * <p>
- * <p>to use it, register it in Vfs via {@link org.reflections8.vfs.Vfs#addDefaultURLTypes(org.reflections8.vfs.Vfs.UrlType)} or {@link org.reflections8.vfs.Vfs#setDefaultURLTypes(java.util.List)}.
+ * <p>to use it, register it in Vfs via {@link org.reflections.vfs.Vfs#addDefaultURLTypes(org.reflections.vfs.Vfs.UrlType)} or {@link org.reflections.vfs.Vfs#setDefaultURLTypes(java.util.List)}.
  * @author Sergio Pola
  *
  */
@@ -43,7 +42,6 @@ public class UrlTypeVFS implements UrlType {
             } catch (IOException e1) {
                 if (Reflections.log.isPresent()) {
                     Reflections.log.get().warn("Could not get URL", e);
-                    Reflections.log.get().warn("Could not get URL", e1);
                 }
             }
         }
@@ -52,7 +50,7 @@ public class UrlTypeVFS implements UrlType {
 
     public URL adaptURL(URL url) throws MalformedURLException {
         if (VFSZIP.equals(url.getProtocol())) {
-            return replaceZipSeparators(url.getPath(), realFile);
+            return replaceZipSeparators(url.getPath(), file -> file.exists() && file.isFile());
         } else if (VFSFILE.equals(url.getProtocol())) {
             return new URL(url.toString().replace(VFSFILE, "file"));
         } else {
@@ -84,12 +82,6 @@ public class UrlTypeVFS implements UrlType {
             return -1;
         }
     }
-
-    Predicate<File> realFile = new Predicate<File>() {
-        public boolean test(File file) {
-            return file.exists() && file.isFile();
-        }
-    };
 
     URL replaceZipSeparatorStartingFrom(String path, int pos)
             throws MalformedURLException {

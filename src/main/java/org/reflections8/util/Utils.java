@@ -1,6 +1,6 @@
 package org.reflections8.util;
 
-import static java.util.Optional.of;          
+import static java.util.Optional.of;
 import static org.reflections8.ReflectionUtils.forName;
 
 import java.io.File;
@@ -53,14 +53,16 @@ public abstract class Utils {
         File file = new File(filename);
         File parent = file.getAbsoluteFile().getParentFile();
         if (!parent.exists()) {
-            //noinspection ResultOfMethodCallIgnored
+            // noinspection ResultOfMethodCallIgnored
             parent.mkdirs();
         }
         return file;
     }
 
-    public static Member getMemberFromDescriptor(String descriptor, ClassLoader... classLoaders) throws ReflectionsException {
-        return getMemberFromDescriptor(descriptor, Optional.of(classLoaders != null? classLoaders : new ClassLoader[]{}));
+    public static Member getMemberFromDescriptor(String descriptor, ClassLoader... classLoaders)
+            throws ReflectionsException {
+        return getMemberFromDescriptor(descriptor,
+                Optional.of(classLoaders != null ? classLoaders : new ClassLoader[] {}));
     }
 
     public static Member getMemberFromDescriptor(String descriptor, Optional<ClassLoader[]> classLoaders) {
@@ -72,9 +74,14 @@ public abstract class Utils {
         String className = memberKey.substring(memberKey.lastIndexOf(' ') + 1, p1);
         String memberName = memberKey.substring(p1 + 1);
         int endsWithLambda = memberKey.lastIndexOf(".lambda");
+        int endsWithAccess = memberKey.lastIndexOf(".access");
         if (endsWithLambda > 0) {
             memberName = memberKey.substring(endsWithLambda + 1);
             className = memberKey.substring(memberKey.lastIndexOf(' ') + 1, endsWithLambda);
+        }
+        if (endsWithAccess > 0) {
+            memberName = memberKey.substring(endsWithAccess + 1);
+            className = memberKey.substring(memberKey.lastIndexOf(' ') + 1, endsWithAccess);
         }
 
         Class<?>[] parameterTypes = getParameterTypes(classLoaders, methodParameters);
@@ -102,9 +109,11 @@ public abstract class Utils {
                 if (!descriptor.contains("(")) {
                     return aClass.isInterface() ? aClass.getField(memberName) : aClass.getDeclaredField(memberName);
                 } else if (isConstructor(descriptor)) {
-                    return aClass.isInterface() ? aClass.getConstructor(parameterTypes) : aClass.getDeclaredConstructor(parameterTypes);
+                    return aClass.isInterface() ? aClass.getConstructor(parameterTypes)
+                            : aClass.getDeclaredConstructor(parameterTypes);
                 } else {
-                    return aClass.isInterface() ? aClass.getMethod(memberName, parameterTypes) : aClass.getDeclaredMethod(memberName, parameterTypes);
+                    return aClass.isInterface() ? aClass.getMethod(memberName, parameterTypes)
+                            : aClass.getDeclaredMethod(memberName, parameterTypes);
                 }
             } catch (Exception e) {
                 aClass = aClass.getSuperclass();
@@ -113,34 +122,42 @@ public abstract class Utils {
         throw new ReflectionsException("Can't resolve member named " + memberName + " for class " + className);
     }
 
-    public static Set<Method> getMethodsFromDescriptors(Iterable<String> annotatedWith, Optional<ClassLoader[]> classLoaders) {
+    public static Set<Method> getMethodsFromDescriptors(Iterable<String> annotatedWith,
+            Optional<ClassLoader[]> classLoaders) {
         Set<Method> result = new HashSet<>();
         for (String annotated : annotatedWith) {
             if (!isConstructor(annotated)) {
                 Method member = (Method) getMemberFromDescriptor(annotated, classLoaders);
-                if (member != null) result.add(member);
+                if (member != null)
+                    result.add(member);
             }
         }
         return result;
 
     }
-    
+
     public static Set<Method> getMethodsFromDescriptors(Iterable<String> annotatedWith, ClassLoader... classLoaders) {
-        return getMethodsFromDescriptors(annotatedWith, Optional.of(classLoaders != null? classLoaders : new ClassLoader[]{}));
+        return getMethodsFromDescriptors(annotatedWith,
+                Optional.of(classLoaders != null ? classLoaders : new ClassLoader[] {}));
     }
 
-    public static Set<Constructor> getConstructorsFromDescriptors(Iterable<String> annotatedWith, Optional<ClassLoader[]> classLoaders) {
+    public static Set<Constructor> getConstructorsFromDescriptors(Iterable<String> annotatedWith,
+            Optional<ClassLoader[]> classLoaders) {
         Set<Constructor> result = new HashSet<>();
         for (String annotated : annotatedWith) {
             if (isConstructor(annotated)) {
                 Constructor member = (Constructor) getMemberFromDescriptor(annotated, classLoaders);
-                if (member != null) result.add(member);
+                if (member != null)
+                    result.add(member);
             }
         }
         return result;
     }
-    public static Set<Constructor> getConstructorsFromDescriptors(Iterable<String> annotatedWith, ClassLoader... classLoaders) {
-        return getConstructorsFromDescriptors(annotatedWith, Optional.of(classLoaders != null? classLoaders : new ClassLoader[]{}));
+
+    public static Set<Constructor> getConstructorsFromDescriptors(Iterable<String> annotatedWith,
+            ClassLoader... classLoaders) {
+        return getConstructorsFromDescriptors(annotatedWith,
+                Optional.of(classLoaders != null ? classLoaders : new ClassLoader[] {}));
     }
 
     public static Set<Member> getMembersFromDescriptors(Iterable<String> values, Optional<ClassLoader[]> classLoaders) {
@@ -156,11 +173,11 @@ public abstract class Utils {
     }
 
     public static Set<Member> getMembersFromDescriptors(Iterable<String> values, ClassLoader... classLoaders) {
-        return getMembersFromDescriptors(values, of(classLoaders != null? classLoaders : new ClassLoader[]{}));
+        return getMembersFromDescriptors(values, of(classLoaders != null ? classLoaders : new ClassLoader[] {}));
     }
 
     public static Field getFieldFromString(String field, ClassLoader... classLoaders) {
-        return getFieldFromString(field, Optional.of(classLoaders != null? classLoaders : new ClassLoader[]{}));
+        return getFieldFromString(field, Optional.of(classLoaders != null ? classLoaders : new ClassLoader[] {}));
     }
 
     public static Field getFieldFromString(String field, Optional<ClassLoader[]> classLoaders) {
@@ -175,8 +192,10 @@ public abstract class Utils {
     }
 
     public static void close(InputStream closeable) {
-        try { if (closeable != null) closeable.close(); }
-        catch (IOException e) {
+        try {
+            if (closeable != null)
+                closeable.close();
+        } catch (IOException e) {
             if (Reflections.log.isPresent()) {
                 Reflections.log.get().warn("Could not close InputStream", e);
             }
@@ -185,10 +204,14 @@ public abstract class Utils {
 
     public static Optional<Logger> findLogger(Class<?> aClass) {
         try {
-            // This is to check whether an optional SLF4J binding is available. While SLF4J recommends that libraries
-            // "should not declare a dependency on any SLF4J binding but only depend on slf4j-api", doing so forces
-            // users of the library to either add a binding to the classpath (even if just slf4j-nop) or to set the
-            // "slf4j.suppressInitError" system property in order to avoid the warning, which both is inconvenient.
+            // This is to check whether an optional SLF4J binding is available. While SLF4J
+            // recommends that libraries
+            // "should not declare a dependency on any SLF4J binding but only depend on
+            // slf4j-api", doing so forces
+            // users of the library to either add a binding to the classpath (even if just
+            // slf4j-nop) or to set the
+            // "slf4j.suppressInitError" system property in order to avoid the warning,
+            // which both is inconvenient.
             Class.forName("org.slf4j.impl.StaticLoggerBinder");
             return Optional.of(LoggerFactory.getLogger(aClass));
         } catch (Throwable e) {
@@ -213,10 +236,10 @@ public abstract class Utils {
         }
     }
 
-
     public static List<String> names(Iterable<Class<?>> types) {
         List<String> result = new ArrayList<String>();
-        for (Class<?> type : types) result.add(name(type));
+        for (Class<?> type : types)
+            result.add(name(type));
         return result;
     }
 
@@ -225,16 +248,20 @@ public abstract class Utils {
     }
 
     public static String name(Constructor constructor) {
-        return constructor.getName() + "." + "<init>" + "(" + Joiner.on(", ").join(names(constructor.getParameterTypes())) + ")";
+        return constructor.getName() + "." + "<init>" + "("
+                + Joiner.on(", ").join(names(constructor.getParameterTypes())) + ")";
     }
 
     public static String name(Method method) {
-        return method.getDeclaringClass().getName() + "." + method.getName() + "(" + Joiner.on(", ").join(names(method.getParameterTypes())) + ")";
+        return method.getDeclaringClass().getName() + "." + method.getName() + "("
+                + Joiner.on(", ").join(names(method.getParameterTypes())) + ")";
     }
 
     public static String name(Field field) {
         return field.getDeclaringClass().getName() + "." + field.getName();
     }
 
-    public static String index(Class<? extends Scanner> scannerClass) { return scannerClass.getSimpleName(); }
+    public static String index(Class<? extends Scanner> scannerClass) {
+        return scannerClass.getSimpleName();
+    }
 }

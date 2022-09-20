@@ -1,17 +1,14 @@
 package org.reflections8.vfs;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Stack;
+import org.reflections8.ReflectionsException;
 
-import org.reflections8.util.AbstractIterator;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Collections;
 
 /*
- * An implementation of {@link org.reflections8.vfs.Vfs.Dir} for directory {@link java.io.File}.
+ * An implementation of {@link org.reflections.vfs.Vfs.Dir} for directory {@link java.io.File}.
  */
 public class SystemDir implements Vfs.Dir {
     private final File file;
@@ -20,58 +17,24 @@ public class SystemDir implements Vfs.Dir {
         if (file != null && (!file.isDirectory() || !file.canRead())) {
             throw new RuntimeException("cannot use dir " + file);
         }
-
         this.file = file;
     }
 
     public String getPath() {
-        if (file == null) {
-            return "/NO-SUCH-DIRECTORY/";
-        }
-        return file.getPath().replace("\\", "/");
+        return file != null ? file.getPath().replace("\\", "/") : "/NO-SUCH-DIRECTORY/";
     }
 
     public Iterable<Vfs.File> getFiles() {
-        if (file == null || !file.exists()) {
-            return Collections.emptyList();
-        }
-        return new Iterable<Vfs.File>() {
-            public Iterator<Vfs.File> iterator() {
-                return new AbstractIterator<Vfs.File>() {
-                    final Stack<File> stack = new Stack<File>();
-                    {stack.addAll(listFiles(file));}
-
-                    public Vfs.File computeNext() {
-                        while (!stack.isEmpty()) {
-                            final File file = stack.pop();
-                            if (file.isDirectory()) {
-                                stack.addAll(listFiles(file));
-                            } else {
-                                return new SystemFile(SystemDir.this, file);
-                            }
-                        }
-
-                        return endOfData();
-                    }
-                };
+        if (file == null || !file.exists()) return Collections.emptyList();
+        return () -> {
+            try {
+                return Files.walk(file.toPath())
+                        .filter(Files::isRegularFile)
+                        .map(path -> (Vfs.File) new SystemFile(SystemDir.this, path.toFile()))
+                        .iterator();
+            } catch (IOException e) {
+                throw new ReflectionsException("could not get files for " + file, e);
             }
         };
-    }
-
-    private static List<File> listFiles(final File file) {
-        File[] files = file.listFiles();
-
-        if (files != null)
-            return Arrays.asList(files);
-        else
-            return new ArrayList();
-    }
-
-    public void close() {
-    }
-
-    @Override
-    public String toString() {
-        return getPath();
     }
 }

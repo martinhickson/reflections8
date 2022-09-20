@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.ZipEntry;
 
-/** an implementation of {@link org.reflections8.vfs.Vfs.File} for {@link java.util.zip.ZipEntry} */
+/** an implementation of {@link org.reflections.vfs.Vfs.File} for {@link java.util.zip.ZipEntry} */
 public class ZipFile implements Vfs.File {
     private final ZipDir root;
     private final ZipEntry entry;

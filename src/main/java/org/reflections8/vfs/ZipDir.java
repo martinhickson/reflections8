@@ -1,15 +1,11 @@
 package org.reflections8.vfs;
 
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
-
 import org.reflections8.Reflections;
-import org.reflections8.util.AbstractIterator;
 
-/** an implementation of {@link org.reflections8.vfs.Vfs.Dir} for {@link java.util.zip.ZipFile} */
+import java.io.IOException;
+import java.util.jar.JarFile;
+
+/** an implementation of {@link org.reflections.vfs.Vfs.Dir} for {@link java.util.zip.ZipFile} */
 public class ZipDir implements Vfs.Dir {
     final java.util.zip.ZipFile jarFile;
 
@@ -18,28 +14,14 @@ public class ZipDir implements Vfs.Dir {
     }
 
     public String getPath() {
-        return jarFile.getName();
+        return jarFile != null ? jarFile.getName().replace("\\", "/") : "/NO-SUCH-DIRECTORY/";
     }
 
     public Iterable<Vfs.File> getFiles() {
-        return new Iterable<Vfs.File>() {
-            public Iterator<Vfs.File> iterator() {
-                return new AbstractIterator<Vfs.File>() {
-                    final Enumeration<? extends ZipEntry> entries = jarFile.entries();
-
-                    protected Vfs.File computeNext() {
-                        while (entries.hasMoreElements()) {
-                            ZipEntry entry = entries.nextElement();
-                            if (!entry.isDirectory()) {
-                                return new ZipFile(ZipDir.this, entry);
-                            }
-                        }
-
-                        return endOfData();
-                    }
-                };
-            }
-        };
+        return () -> jarFile.stream()
+                .filter(entry -> !entry.isDirectory())
+                .map(entry -> (Vfs.File) new ZipFile(ZipDir.this, entry))
+                .iterator();
     }
 
     public void close() {
