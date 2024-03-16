@@ -132,9 +132,28 @@ import org.slf4j.Logger;
  * <p><p><p>For Javadoc, source code, and more information about Reflections Library, see http://github.com/ronmamo/reflections/
  */
 public class  Reflections {
+
+    /*
+     * Provide for convenient verbosity tuning in cloud deployments via the
+     * "reflections17.verbose.timing" and "reflection17.verbose.scanning"
+     * environment variables:
+     */
+    private static final String VERBOSE_TIMING_PROPERTY = "reflections17.verbose.timing";
+
+    private static final String VERBOSE_SCANNING_PROPERTY = "reflections17.verbose.scanning";
+
+    static final boolean REFLECTIONS_VERBOSE_TIMING = Boolean.getBoolean(VERBOSE_TIMING_PROPERTY)
+            || "true".equals(System.getenv(VERBOSE_TIMING_PROPERTY));
+
+    static final boolean REFLECTIONS_VERBOSE_SCANNING = Boolean.getBoolean(VERBOSE_SCANNING_PROPERTY)
+            || "true".equals(System.getenv(VERBOSE_SCANNING_PROPERTY));
+
+    private static final String TIMING_INFO = "Reflections initialized in {} ms";
+
     public static final Optional<Logger> log = findLogger(Reflections.class);
 
     protected final transient Configuration configuration;
+
     protected Store store;
 
     /**
@@ -142,20 +161,26 @@ public class  Reflections {
      * <p>it is preferred to use {@link org.reflections8.util.ConfigurationBuilder}
      */
     public Reflections(final Configuration configuration) {
+        long start = System.currentTimeMillis();
         this.configuration = configuration;
         store = new Store(configuration);
-
         if (configuration.getScanners() != null && !configuration.getScanners().isEmpty()) {
-            //inject to scanners
             for (Scanner scanner : configuration.getScanners()) {
                 scanner.setConfiguration(configuration);
                 scanner.setStore(store.getOrCreate(index(scanner.getClass())));
             }
-
             scan();
-
             if (configuration.shouldExpandSuperTypes()) {
                 expandSuperTypes();
+            }
+        }
+        Logger logger = log.get();
+        if (REFLECTIONS_VERBOSE_TIMING || logger.isTraceEnabled()) {
+            long end = System.currentTimeMillis();
+            if (REFLECTIONS_VERBOSE_TIMING) {
+                logger.warn(TIMING_INFO, end - start);
+            } else {
+                logger.trace(TIMING_INFO, end - start);
             }
         }
     }

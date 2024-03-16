@@ -24,6 +24,7 @@ import java.util.stream.StreamSupport;
 
 import org.reflections8.util.AlwaysTruePredicate;
 import org.reflections8.util.ClasspathHelper;
+import org.slf4j.Logger;
 
 /** convenient java reflection helper methods
  * <p>
@@ -38,7 +39,7 @@ import org.reflections8.util.ClasspathHelper;
  *         <li>{@link #getAllMethods(Class, Predicate...)}
  *         <li>{@link #getAllConstructors(Class,Predicate...)}
  *     </ul>
- *     <p>and predicates included here all starts with "with", such as 
+ *     <p>and predicates included here all starts with "with", such as
  *     <ul>
  *         <li>{@link #withAnnotation(java.lang.annotation.Annotation)}
  *         <li>{@link #withModifier(int)}
@@ -51,20 +52,34 @@ import org.reflections8.util.ClasspathHelper;
  *         <li>{@link #withReturnType(Class)}
  *         <li>{@link #withType(Class)}
  *         <li>{@link #withTypeAssignableTo}
- *     </ul> 
+ *     </ul>
  *
  *     <p><br>
  *      for example, getting all getters would be:
  *     <pre>
  *      Set&lt;Method&gt; getters = getAllMethods(someClasses,
  *              Predicates.and(
- *                      withModifier(Modifier.PUBLIC), 
- *                      withPrefix("get"), 
+ *                      withModifier(Modifier.PUBLIC),
+ *                      withPrefix("get"),
  *                      withParametersCount(0)));
  *     </pre>
  * */
 @SuppressWarnings("unchecked")
 public abstract class ReflectionUtils {
+
+    private static final String SEMICOLON = ";";
+
+    private static final String L = "L";
+
+    private static final String EMPTY_STRING = "";
+
+    private static final String CLOSE_SQUARE_BRACKET = "]";
+
+    private static final String OPEN_SQUARE_BRACKET = "[";
+
+    private static final String TYPE_UNAVAILABLE_SHORT = "Type: %s unavailable";
+
+    private static final String TYPE_UNAVAILABLE = "Type: %s unavailable from any class loader";
 
     /** would include {@code Object.class} when {@link #getAllSuperTypes(Class, Predicate[])}. default is false. */
     public static final boolean includeObject = false;
@@ -72,7 +87,7 @@ public abstract class ReflectionUtils {
     /** get all super types of given {@code type}, including, optionally filtered by {@code predicates}
      * <p> include {@code Object.class} if {@link #includeObject} is true */
     public static Set<Class<?>> getAllSuperTypes(final Class<?> type, Predicate<? super Class<?>>... predicates) {
-        Set<Class<?>> result = new LinkedHashSet();
+        Set<Class<?>> result = new LinkedHashSet<Class<?>>();
         if (type != null && (includeObject || !type.equals(Object.class))) {
             result.add(type);
             for (Class<?> supertype : getSuperTypes(type)) {
@@ -94,7 +109,7 @@ public abstract class ReflectionUtils {
 
     /** get all methods of given {@code type}, up the super class hierarchy, optionally filtered by {@code predicates} */
     public static Set<Method> getAllMethods(final Class<?> type, Predicate<? super Method>... predicates) {
-        Set<Method> result = new HashSet();
+        Set<Method> result = new HashSet<Method>();
         for (Class<?> t : getAllSuperTypes(type)) {
             result.addAll(getMethods(t, predicates));
         }
@@ -108,7 +123,7 @@ public abstract class ReflectionUtils {
 
     /** get all constructors of given {@code type}, up the super class hierarchy, optionally filtered by {@code predicates} */
     public static Set<Constructor> getAllConstructors(final Class<?> type, Predicate<? super Constructor>... predicates) {
-        Set<Constructor> result = new HashSet();
+        Set<Constructor> result = new HashSet<Constructor>();
         for (Class<?> t : getAllSuperTypes(type)) {
             result.addAll(getConstructors(t, predicates));
         }
@@ -122,7 +137,7 @@ public abstract class ReflectionUtils {
 
     /** get all fields of given {@code type}, up the super class hierarchy, optionally filtered by {@code predicates} */
     public static Set<Field> getAllFields(final Class<?> type, Predicate<? super Field>... predicates) {
-        Set<Field> result = new HashSet();
+        Set<Field> result = new HashSet<Field>();
         for (Class<?> t : getAllSuperTypes(type)) result.addAll(getFields(t, predicates));
         return result;
     }
@@ -134,7 +149,7 @@ public abstract class ReflectionUtils {
 
     /** get all annotations of given {@code type}, up the super class hierarchy, optionally filtered by {@code predicates} */
     public static <T extends AnnotatedElement> Set<Annotation>  getAllAnnotations(T type, Predicate<Annotation>... predicates) {
-        Set<Annotation> result = new HashSet();
+        Set<Annotation> result = new HashSet<Annotation>();
         if (type instanceof Class) {
             for (Class<?> t : getAllSuperTypes((Class<?>) type)) {
                 result.addAll(getAnnotations(t, predicates));
@@ -370,56 +385,60 @@ public abstract class ReflectionUtils {
         } else {
             return forName(typeName, Optional.of(classLoaders));
         }
-
     }
 
-
-        //
-    /** tries to resolve a java type name to a Class
-     * <p>if optional {@link ClassLoader}s are not specified, then both {@link org.reflections8.util.ClasspathHelper#contextClassLoader()} and {@link org.reflections8.util.ClasspathHelper#staticClassLoader()} are used
-     * */
+    /**
+     * Tries to resolve a java type name to a Class
+     * <p>if optional {@link ClassLoader}s are not specified, then both {@link org.reflections8.util.ClasspathHelper#contextClassLoader()}
+     * and {@link org.reflections8.util.ClasspathHelper#staticClassLoader()} are used
+     */
     public static Class<?> forName(String typeName, Optional<ClassLoader[]> classLoaders) {
         if (getPrimitiveNames().contains(typeName)) {
             return getPrimitiveTypes().get(getPrimitiveNames().indexOf(typeName));
         } else {
             String type;
-            if (typeName.contains("[")) {
-                int i = typeName.indexOf("[");
+            if (typeName.contains(OPEN_SQUARE_BRACKET)) {
+                int i = typeName.indexOf(OPEN_SQUARE_BRACKET);
                 type = typeName.substring(0, i);
-                String array = typeName.substring(i).replace("]", "");
-
+                String array = typeName.substring(i).replace(CLOSE_SQUARE_BRACKET, EMPTY_STRING);
                 if (getPrimitiveNames().contains(type)) {
                     type = getPrimitiveDescriptors().get(getPrimitiveNames().indexOf(type));
                 } else {
-                    type = "L" + type + ";";
+                    type = L + type + SEMICOLON;
                 }
-
                 type = array + type;
             } else {
                 type = typeName;
             }
-
-            List<ReflectionsException> reflectionsExceptions = new ArrayList();
+            List<ReflectionsException> reflectionsExceptions = new ArrayList<ReflectionsException>();
             for (ClassLoader classLoader : ClasspathHelper.classLoaders(classLoaders).get()) {
-                if (type.contains("[")) {
-                    try { return Class.forName(type, false, classLoader); }
-                    catch (Throwable e) {
-                        reflectionsExceptions.add(new ReflectionsException("could not get type for name " + typeName, e));
+                if (type.contains(OPEN_SQUARE_BRACKET)) {
+                    try {
+                        return Class.forName(type, false, classLoader);
+                    } catch (Throwable e) {
+                        reflectionsExceptions.add(new ReflectionsException(String.format(TYPE_UNAVAILABLE_SHORT, typeName), e));
                     }
                 }
-                try { return classLoader.loadClass(type); }
-                catch (Throwable e) {
-                    reflectionsExceptions.add(new ReflectionsException("could not get type for name " + typeName, e));
+                try {
+                    return classLoader.loadClass(type);
+                } catch (Throwable e) {
+                    reflectionsExceptions.add(new ReflectionsException(String.format(TYPE_UNAVAILABLE_SHORT, typeName), e));
                 }
             }
-
             if (Reflections.log.isPresent()) {
+                Logger logger = Reflections.log.get();
                 for (ReflectionsException reflectionsException : reflectionsExceptions) {
-                    Reflections.log.get().warn("could not get type for name " + typeName + " from any class loader",
-                            reflectionsException);
+                    boolean traceEnabled = logger.isTraceEnabled();
+                    if (Reflections.REFLECTIONS_VERBOSE_SCANNING || traceEnabled) {
+                        String message = String.format(TYPE_UNAVAILABLE, typeName);
+                        if (traceEnabled) {
+                            logger.trace(message, reflectionsException);
+                        } else {
+                            logger.warn(message, reflectionsException);
+                        }
+                    }
                 }
             }
-
             return null;
         }
     }
@@ -451,7 +470,7 @@ public abstract class ReflectionUtils {
     }
 
     private static Set<Annotation> parameterAnnotations(Member member) {
-        Set<Annotation> result = new HashSet();
+        Set<Annotation> result = new HashSet<Annotation>();
         Annotation[][] annotations =
                 member instanceof Method ? ((Method) member).getParameterAnnotations() :
                 member instanceof Constructor ? ((Constructor) member).getParameterAnnotations() : null;
@@ -462,7 +481,7 @@ public abstract class ReflectionUtils {
     }
 
     private static Set<Class<? extends Annotation>> annotationTypes(Iterable<Annotation> annotations) {
-        Set<Class<? extends Annotation>> result = new HashSet();
+        Set<Class<? extends Annotation>> result = new HashSet<Class<? extends Annotation>>();
         for (Annotation annotation : annotations) result.add(annotation.annotationType());
         return result;
     }

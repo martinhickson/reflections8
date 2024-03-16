@@ -1,20 +1,3 @@
-This fork is changed to use java8 instead of guava. 
-
-```xml
-<dependency>
-    <groupId>net.oneandone.reflections8</groupId>
-    <artifactId>reflections8</artifactId>
-    <version>0.11.5</version>
-</dependency>
-```
-
-To avoid mixup of classes between "pre java8"-reflections and reflections8 all is moved from org.reflections to org.reflections8
-[![Build Status](https://travis-ci.org/aschoerk/reflections8.svg?branch=master)](https://travis-ci.org/aschoerk/reflections8)
-
-
-
-----
-
 ## Java runtime metadata analysis, in the spirit of [Scannotations](http://bill.burkecentral.com/2008/01/14/scanning-java-annotations-at-runtime/)
 
 Reflections scans your classpath, indexes the metadata, allows you to query it on runtime and may save and collect that information for many modules within your project.
@@ -28,14 +11,6 @@ Using Reflections you can query your metadata such as:
 [![Build Status](https://travis-ci.org/ronmamo/reflections.svg?branch=master)](https://travis-ci.org/ronmamo/reflections)
 
 ### Intro
-Add Reflections to your project. for maven projects just add this dependency:
-```xml
-<dependency>
-    <groupId>net.oneandone.reflections8</groupId>
-    <artifactId>reflections8</artifactId>
-    <version>0.11.5</version>
-</dependency>
-```
 
 A typical use of Reflections would be:
 ```java
